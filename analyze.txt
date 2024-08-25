@@ -1,0 +1,800 @@
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0956358,83,0
+Input,-0.111424,2886,0
+Input,-0.0908391,2777,0
+Output,-0.112933,0.471797,-0.112932
+Output,-0.10052,0.474892,-0.100518
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0956358,Output,-0.112933,1.28593e-11
+Input,-0.0956358,Output,-0.10052,4.68793e-10
+Input,-0.111424,Output,-0.112933,1.2197e-11
+Input,-0.111424,Output,-0.10052,3.28179e-10
+Input,-0.0908391,Output,-0.112933,3.67644e-10
+Input,-0.0908391,Output,-0.10052,4.09033e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0899933,15,0
+Input,-0.106788,3793,0
+Input,-0.112879,3335,0
+Output,-0.0971832,0.475723,-0.0971838
+Output,-0.114402,0.471431,-0.114402
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0899933,Output,-0.0971832,4.60423e-10
+Input,-0.0899933,Output,-0.114402,-2.7738e-10
+Input,-0.106788,Output,-0.0971832,-4.13251e-10
+Input,-0.106788,Output,-0.114402,-2.35766e-10
+Input,-0.112879,Output,-0.0971832,2.78691e-10
+Input,-0.112879,Output,-0.114402,2.05595e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0899705,86,0
+Input,-0.0965843,492,0
+Input,-0.0920089,1649,0
+Output,-0.115668,0.471115,-0.115667
+Output,-0.101754,0.474584,-0.101754
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0899705,Output,-0.115668,-4.40676e-10
+Input,-0.0899705,Output,-0.101754,2.96976e-10
+Input,-0.0965843,Output,-0.115668,-4.25343e-10
+Input,-0.0965843,Output,-0.101754,4.10922e-10
+Input,-0.0920089,Output,-0.115668,5.24577e-10
+Input,-0.0920089,Output,-0.101754,4.33762e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0944585,21,0
+Input,-0.11761,2362,0
+Input,-0.109159,27,0
+Output,-0.099739,0.475086,-0.0997402
+Output,-0.081643,0.479601,-0.0816424
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0944585,Output,-0.099739,-2.02113e-10
+Input,-0.0944585,Output,-0.081643,2.27658e-11
+Input,-0.11761,Output,-0.099739,-5.14631e-10
+Input,-0.11761,Output,-0.081643,2.41701e-10
+Input,-0.109159,Output,-0.099739,3.86672e-10
+Input,-0.109159,Output,-0.081643,3.30537e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.115476,90,0
+Input,-0.103808,59,0
+Input,-0.101606,2763,0
+Output,-0.115856,0.471069,-0.115855
+Output,-0.0815116,0.479633,-0.0815131
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.115476,Output,-0.115856,-7.33904e-11
+Input,-0.115476,Output,-0.0815116,-9.41544e-11
+Input,-0.103808,Output,-0.115856,4.52232e-10
+Input,-0.103808,Output,-0.0815116,4.98463e-10
+Input,-0.101606,Output,-0.115856,3.57722e-10
+Input,-0.101606,Output,-0.0815116,-5.69986e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.115641,26,492
+Input,-0.0843863,540,0
+Input,-0.0831094,3426,0
+Output,-0.102442,0.474412,-0.102441
+Output,-0.0948606,0.476303,-0.0948601
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.115641,Output,-0.102442,4.77634e-10
+Input,-0.115641,Output,-0.0948606,-3.36737e-12
+Input,-0.0843863,Output,-0.102442,-1.14557e-10
+Input,-0.0843863,Output,-0.0948606,-1.4664e-11
+Input,-0.0831094,Output,-0.102442,3.72866e-10
+Input,-0.0831094,Output,-0.0948606,1.38403e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0869161,72,0
+Input,-0.0855892,3736,0
+Input,-0.107007,211,0
+Output,-0.107674,0.473107,-0.107675
+Output,-0.11109,0.472256,-0.11109
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0869161,Output,-0.107674,-2.7163e-12
+Input,-0.0869161,Output,-0.11109,9.54227e-12
+Input,-0.0855892,Output,-0.107674,-2.31554e-10
+Input,-0.0855892,Output,-0.11109,1.52243e-11
+Input,-0.107007,Output,-0.107674,6.17665e-11
+Input,-0.107007,Output,-0.11109,3.57549e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.100205,68,6.93016e-310
+Input,-0.105661,2567,0
+Input,-0.0960228,1429,0
+Output,-0.092529,0.476884,-0.092529
+Output,-0.107864,0.47306,-0.107865
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.100205,Output,-0.092529,4.12101e-10
+Input,-0.100205,Output,-0.107864,-5.01399e-11
+Input,-0.105661,Output,-0.092529,-2.03828e-10
+Input,-0.105661,Output,-0.107864,-2.0807e-10
+Input,-0.0960228,Output,-0.092529,3.30253e-10
+Input,-0.0960228,Output,-0.107864,-3.50382e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.101157,82,6.93016e-310
+Input,-0.113222,1530,0
+Input,-0.113219,2862,0
+Output,-0.0926458,0.476855,-0.0926445
+Output,-0.0926228,0.476861,-0.0926236
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.101157,Output,-0.0926458,-2.22058e-10
+Input,-0.101157,Output,-0.0926228,1.47283e-10
+Input,-0.113222,Output,-0.0926458,2.23233e-10
+Input,-0.113222,Output,-0.0926228,1.69759e-10
+Input,-0.113219,Output,-0.0926458,3.38017e-10
+Input,-0.113219,Output,-0.0926228,-3.70846e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.110372,23,2567
+Input,-0.113601,2067,0
+Input,-0.119383,3135,0
+Output,-0.0929161,0.476788,-0.0929163
+Output,-0.10619,0.473477,-0.106192
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.110372,Output,-0.0929161,4.77393e-12
+Input,-0.110372,Output,-0.10619,-3.04197e-10
+Input,-0.113601,Output,-0.0929161,1.18081e-10
+Input,-0.113601,Output,-0.10619,-5.24348e-10
+Input,-0.119383,Output,-0.0929161,-1.25658e-10
+Input,-0.119383,Output,-0.10619,-3.80952e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.101983,29,2067
+Input,-0.104404,3802,0
+Input,-0.0945288,4022,0
+Output,-0.0982637,0.475454,-0.0982638
+Output,-0.0998417,0.47506,-0.0998441
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.101983,Output,-0.0982637,2.13112e-10
+Input,-0.101983,Output,-0.0998417,1.03381e-10
+Input,-0.104404,Output,-0.0982637,3.19756e-11
+Input,-0.104404,Output,-0.0998417,-3.53176e-10
+Input,-0.0945288,Output,-0.0982637,-5.38414e-11
+Input,-0.0945288,Output,-0.0998417,-2.5891e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.116265,58,6.93016e-310
+Input,-0.112437,1069,5.08189e+233
+Input,-0.118784,3167,9.34282e-67
+Output,-0.110126,0.472496,-0.110126
+Output,-0.0835272,0.47913,-0.0835273
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.116265,Output,-0.110126,-5.00175e-10
+Input,-0.116265,Output,-0.0835272,-3.2723e-10
+Input,-0.112437,Output,-0.110126,4.52206e-10
+Input,-0.112437,Output,-0.0835272,-7.28507e-11
+Input,-0.118784,Output,-0.110126,-1.74441e-10
+Input,-0.118784,Output,-0.0835272,-7.89722e-12
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0923568,93,3736
+Input,-0.113887,2456,0
+Input,-0.113789,11,0
+Output,-0.11124,0.472218,-0.111241
+Output,-0.111397,0.47218,-0.111396
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0923568,Output,-0.11124,-5.53645e-10
+Input,-0.0923568,Output,-0.111397,2.34651e-10
+Input,-0.113887,Output,-0.11124,-4.11421e-10
+Input,-0.113887,Output,-0.111397,5.07954e-10
+Input,-0.113789,Output,-0.11124,1.07907e-10
+Input,-0.113789,Output,-0.111397,-1.5197e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.100082,42,1069
+Input,-0.0824651,229,0
+Input,-0.0838288,2373,0
+Output,-0.0898914,0.477542,-0.0898923
+Output,-0.100021,0.475016,-0.100021
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.100082,Output,-0.0898914,-5.57838e-10
+Input,-0.100082,Output,-0.100021,3.3927e-10
+Input,-0.0824651,Output,-0.0898914,5.27653e-10
+Input,-0.0824651,Output,-0.100021,-4.44184e-10
+Input,-0.0838288,Output,-0.0898914,-4.20793e-10
+Input,-0.0838288,Output,-0.100021,-1.88591e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.111957,21,0.475016
+Input,-0.118582,919,0
+Input,-0.0805435,3784,0
+Output,-0.0916301,0.477109,-0.0916286
+Output,-0.0934632,0.476651,-0.0934628
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.111957,Output,-0.0916301,5.40864e-10
+Input,-0.111957,Output,-0.0934632,5.55552e-10
+Input,-0.118582,Output,-0.0916301,-4.59763e-10
+Input,-0.118582,Output,-0.0934632,2.09841e-10
+Input,-0.0805435,Output,-0.0916301,4.97803e-10
+Input,-0.0805435,Output,-0.0934632,4.20723e-11
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.1083,37,0
+Input,-0.100408,3198,0
+Input,-0.0884751,4324,0
+Output,-0.0891229,0.477734,-0.0891236
+Output,-0.11761,0.470631,-0.117611
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.1083,Output,-0.0891229,-4.07211e-10
+Input,-0.1083,Output,-0.11761,-2.86773e-10
+Input,-0.100408,Output,-0.0891229,-2.0401e-10
+Input,-0.100408,Output,-0.11761,1.12869e-10
+Input,-0.0884751,Output,-0.0891229,-1.3355e-11
+Input,-0.0884751,Output,-0.11761,-1.27733e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.118043,15,0
+Input,-0.0872618,370,0
+Input,-0.109951,1413,0
+Output,-0.109185,0.472731,-0.109186
+Output,-0.1191,0.47026,-0.1191
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.118043,Output,-0.109185,-4.72728e-10
+Input,-0.118043,Output,-0.1191,-1.40867e-10
+Input,-0.0872618,Output,-0.109185,3.09563e-12
+Input,-0.0872618,Output,-0.1191,3.76334e-10
+Input,-0.109951,Output,-0.109185,-4.93636e-10
+Input,-0.109951,Output,-0.1191,-1.375e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.115694,26,0
+Input,-0.0936161,91,0
+Input,-0.0980832,3980,0
+Output,-0.0920098,0.477014,-0.09201
+Output,-0.0939365,0.476533,-0.0939359
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.115694,Output,-0.0920098,-1.79325e-10
+Input,-0.115694,Output,-0.0939365,-4.2701e-10
+Input,-0.0936161,Output,-0.0920098,-3.70084e-10
+Input,-0.0936161,Output,-0.0939365,4.8282e-10
+Input,-0.0980832,Output,-0.0920098,-4.84092e-11
+Input,-0.0980832,Output,-0.0939365,1.34512e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0832273,56,91
+Input,-0.0887148,1873,0
+Input,-0.118831,1862,0
+Output,-0.0801526,0.479972,-0.0801533
+Output,-0.110207,0.472476,-0.110207
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0832273,Output,-0.0801526,-3.12334e-10
+Input,-0.0832273,Output,-0.110207,-3.27083e-10
+Input,-0.0887148,Output,-0.0801526,1.36033e-10
+Input,-0.0887148,Output,-0.110207,-1.79797e-10
+Input,-0.118831,Output,-0.0801526,-4.93905e-10
+Input,-0.118831,Output,-0.110207,-7.84403e-12
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.08221,70,91
+Input,-0.111762,2996,0
+Input,-0.0986151,2281,0
+Output,-0.0806903,0.479838,-0.080691
+Output,-0.0879821,0.478019,-0.0879798
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.08221,Output,-0.0806903,-5.62555e-10
+Input,-0.08221,Output,-0.0879821,1.27077e-10
+Input,-0.111762,Output,-0.0806903,2.01587e-10
+Input,-0.111762,Output,-0.0879821,5.65635e-10
+Input,-0.0986151,Output,-0.0806903,-5.41684e-10
+Input,-0.0986151,Output,-0.0879821,2.6133e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0939706,5,0
+Input,-0.0818986,925,0
+Input,-0.118344,2084,0
+Output,-0.104377,0.473929,-0.104379
+Output,-0.0841667,0.478971,-0.0841656
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0939706,Output,-0.104377,-3.29148e-10
+Input,-0.0939706,Output,-0.0841667,-1.12038e-10
+Input,-0.0818986,Output,-0.104377,-5.05959e-10
+Input,-0.0818986,Output,-0.0841667,2.92577e-10
+Input,-0.118344,Output,-0.104377,-3.51075e-10
+Input,-0.118344,Output,-0.0841667,3.98309e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.107578,27,6.93016e-310
+Input,-0.0838749,336,0
+Input,-0.0917143,1505,0
+Output,-0.0971756,0.475725,-0.0971762
+Output,-0.108458,0.472912,-0.108458
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.107578,Output,-0.0971756,-6.62489e-11
+Input,-0.107578,Output,-0.108458,3.74386e-10
+Input,-0.0838749,Output,-0.0971756,5.6311e-10
+Input,-0.0838749,Output,-0.108458,1.60227e-10
+Input,-0.0917143,Output,-0.0971756,-5.16003e-10
+Input,-0.0917143,Output,-0.108458,1.27218e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0820501,46,0
+Input,-0.112039,1729,0
+Input,-0.0946368,1313,0
+Output,-0.0965254,0.475887,-0.0965265
+Output,-0.114064,0.471515,-0.114064
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0820501,Output,-0.0965254,-5.67357e-10
+Input,-0.0820501,Output,-0.114064,4.83932e-11
+Input,-0.112039,Output,-0.0965254,-2.22095e-10
+Input,-0.112039,Output,-0.114064,3.10843e-10
+Input,-0.0946368,Output,-0.0965254,-5.09235e-10
+Input,-0.0946368,Output,-0.114064,-5.46044e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0892105,57,1729
+Input,-0.0896966,124,0
+Input,-0.102166,3895,0
+Output,-0.119383,0.470189,-0.119385
+Output,-0.116193,0.470984,-0.116194
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0892105,Output,-0.119383,2.24832e-10
+Input,-0.0892105,Output,-0.116193,4.35741e-10
+Input,-0.0896966,Output,-0.119383,-4.37736e-10
+Input,-0.0896966,Output,-0.116193,4.14205e-10
+Input,-0.102166,Output,-0.119383,-3.6914e-10
+Input,-0.102166,Output,-0.116193,-3.12126e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0885331,82,6.93016e-310
+Input,-0.115968,545,0
+Input,-0.11084,3814,0
+Output,-0.0920058,0.477015,-0.0920041
+Output,-0.117659,0.470619,-0.117658
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0885331,Output,-0.0920058,5.70194e-10
+Input,-0.0885331,Output,-0.117659,-9.92614e-11
+Input,-0.115968,Output,-0.0920058,9.90966e-11
+Input,-0.115968,Output,-0.117659,3.76036e-10
+Input,-0.11084,Output,-0.0920058,4.2834e-10
+Input,-0.11084,Output,-0.117659,9.92859e-11
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0978889,83,0
+Input,-0.111873,2886,0
+Input,-0.0965355,2777,0
+Output,-0.117145,0.470747,-0.117144
+Output,-0.0978148,0.475566,-0.097814
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0978889,Output,-0.117145,5.67631e-10
+Input,-0.0978889,Output,-0.0978148,-4.14371e-10
+Input,-0.111873,Output,-0.117145,1.18678e-10
+Input,-0.111873,Output,-0.0978148,4.4966e-10
+Input,-0.0965355,Output,-0.117145,1.90279e-10
+Input,-0.0965355,Output,-0.0978148,-1.77839e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0998322,15,0
+Input,-0.115217,3793,0
+Input,-0.116152,3335,0
+Output,-0.0927169,0.476837,-0.0927179
+Output,-0.094135,0.476484,-0.0941348
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0998322,Output,-0.0927169,3.51544e-10
+Input,-0.0998322,Output,-0.094135,-1.27928e-10
+Input,-0.115217,Output,-0.0927169,-1.14362e-10
+Input,-0.115217,Output,-0.094135,1.37314e-10
+Input,-0.116152,Output,-0.0927169,-1.67012e-10
+Input,-0.116152,Output,-0.094135,-1.05996e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.109327,86,0
+Input,-0.0822617,492,0
+Input,-0.11382,1649,0
+Output,-0.0932492,0.476704,-0.0932499
+Output,-0.094379,0.476423,-0.0943784
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.109327,Output,-0.0932492,1.44513e-10
+Input,-0.109327,Output,-0.094379,-2.4198e-10
+Input,-0.0822617,Output,-0.0932492,1.55188e-10
+Input,-0.0822617,Output,-0.094379,4.20608e-11
+Input,-0.11382,Output,-0.0932492,-4.81439e-10
+Input,-0.11382,Output,-0.094379,3.44712e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.119632,21,6.92833e-310
+Input,-0.105888,2362,0
+Input,-0.11118,27,0
+Output,-0.0995461,0.475134,-0.0995454
+Output,-0.110259,0.472463,-0.110258
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.119632,Output,-0.0995461,-2.46754e-10
+Input,-0.119632,Output,-0.110259,2.80092e-10
+Input,-0.105888,Output,-0.0995461,2.9473e-10
+Input,-0.105888,Output,-0.110259,1.85068e-10
+Input,-0.11118,Output,-0.0995461,-2.70572e-11
+Input,-0.11118,Output,-0.110259,-4.48398e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0809349,90,6.92833e-310
+Input,-0.113778,59,0
+Input,-0.0823437,2763,0
+Output,-0.100361,0.47493,-0.100362
+Output,-0.114366,0.471439,-0.114367
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0809349,Output,-0.100361,3.83016e-10
+Input,-0.0809349,Output,-0.114366,-8.10171e-11
+Input,-0.113778,Output,-0.100361,-2.22069e-11
+Input,-0.113778,Output,-0.114366,7.34586e-11
+Input,-0.0823437,Output,-0.100361,-5.67222e-10
+Input,-0.0823437,Output,-0.114366,-5.44221e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0860716,26,0
+Input,-0.0914446,540,0
+Input,-0.101293,3426,0
+Output,-0.106034,0.473516,-0.106036
+Output,-0.0957809,0.476073,-0.09578
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0860716,Output,-0.106034,2.49168e-10
+Input,-0.0860716,Output,-0.0957809,4.67835e-10
+Input,-0.0914446,Output,-0.106034,-8.80146e-11
+Input,-0.0914446,Output,-0.0957809,-2.27499e-10
+Input,-0.101293,Output,-0.106034,-4.63586e-10
+Input,-0.101293,Output,-0.0957809,2.99906e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0877192,72,0
+Input,-0.109952,3736,0
+Input,-0.116491,211,0
+Output,-0.110385,0.472432,-0.110386
+Output,-0.0872584,0.4782,-0.0872563
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0877192,Output,-0.110385,-3.35007e-10
+Input,-0.0877192,Output,-0.0872584,1.67537e-10
+Input,-0.109952,Output,-0.110385,-2.0714e-10
+Input,-0.109952,Output,-0.0872584,5.63758e-10
+Input,-0.116491,Output,-0.110385,-4.85179e-10
+Input,-0.116491,Output,-0.0872584,-3.81248e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0863739,68,0.476423
+Input,-0.105813,2567,0
+Input,-0.100297,1429,0
+Output,-0.104276,0.473954,-0.104278
+Output,-0.111609,0.472127,-0.111607
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0863739,Output,-0.104276,-1.99827e-10
+Input,-0.0863739,Output,-0.111609,2.47276e-10
+Input,-0.105813,Output,-0.104276,-2.57621e-10
+Input,-0.105813,Output,-0.111609,4.96783e-10
+Input,-0.100297,Output,-0.104276,-4.4658e-10
+Input,-0.100297,Output,-0.111609,1.77173e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0890374,82,3736
+Input,-0.0897532,1530,0
+Input,-0.0935324,2862,0
+Output,-0.096199,0.475969,-0.0961984
+Output,-0.0801907,0.479963,-0.0801904
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0890374,Output,-0.096199,4.46615e-10
+Input,-0.0890374,Output,-0.0801907,8.17005e-11
+Input,-0.0897532,Output,-0.096199,5.35998e-10
+Input,-0.0897532,Output,-0.0801907,4.63541e-10
+Input,-0.0935324,Output,-0.096199,-7.65271e-11
+Input,-0.0935324,Output,-0.0801907,-1.3091e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.093751,23,3736
+Input,-0.0868277,2067,0
+Input,-0.0994479,3135,0
+Output,-0.098769,0.475328,-0.0987692
+Output,-0.0923132,0.476938,-0.0923146
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.093751,Output,-0.098769,-3.70299e-10
+Input,-0.093751,Output,-0.0923132,1.51315e-11
+Input,-0.0868277,Output,-0.098769,2.14389e-10
+Input,-0.0868277,Output,-0.0923132,-3.57748e-11
+Input,-0.0994479,Output,-0.098769,-2.22547e-10
+Input,-0.0994479,Output,-0.0923132,-4.21919e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0805026,29,6.92833e-310
+Input,-0.0836665,3802,0
+Input,-0.0963025,4022,0
+Output,-0.101031,0.474764,-0.101029
+Output,-0.104159,0.473983,-0.104161
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0805026,Output,-0.101031,3.97062e-10
+Input,-0.0805026,Output,-0.104159,1.5541e-10
+Input,-0.0836665,Output,-0.101031,3.70648e-10
+Input,-0.0836665,Output,-0.104159,-3.04411e-10
+Input,-0.0963025,Output,-0.101031,6.45895e-11
+Input,-0.0963025,Output,-0.104159,-2.66123e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0827829,58,6.92834e-310
+Input,-0.0872592,1069,0
+Input,-0.10116,3167,0
+Output,-0.0929473,0.47678,-0.0929462
+Output,-0.12,0.470036,-0.119999
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0827829,Output,-0.0929473,-8.45444e-11
+Input,-0.0827829,Output,-0.12,1.79502e-10
+Input,-0.0872592,Output,-0.0929473,-5.44316e-10
+Input,-0.0872592,Output,-0.12,-2.85727e-10
+Input,-0.10116,Output,-0.0929473,5.45333e-10
+Input,-0.10116,Output,-0.12,3.36561e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0940348,93,6.92834e-310
+Input,-0.0864213,2456,0
+Input,-0.0914487,11,0
+Output,-0.0989368,0.475286,-0.0989361
+Output,-0.118342,0.470449,-0.118343
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0940348,Output,-0.0989368,-4.98583e-10
+Input,-0.0940348,Output,-0.118342,4.24104e-10
+Input,-0.0864213,Output,-0.0989368,2.82722e-10
+Input,-0.0864213,Output,-0.118342,-3.59694e-10
+Input,-0.0914487,Output,-0.0989368,-4.52577e-10
+Input,-0.0914487,Output,-0.118342,1.82108e-11
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0957703,42,1530
+Input,-0.0909077,229,0
+Input,-0.112222,2373,0
+Output,-0.091861,0.477051,-0.0918599
+Output,-0.103521,0.474142,-0.103522
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0957703,Output,-0.091861,2.98511e-10
+Input,-0.0957703,Output,-0.103521,4.52934e-11
+Input,-0.0909077,Output,-0.091861,2.32749e-10
+Input,-0.0909077,Output,-0.103521,3.88502e-10
+Input,-0.112222,Output,-0.091861,4.14856e-10
+Input,-0.112222,Output,-0.103521,-4.74782e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.10635,21,6.92834e-310
+Input,-0.11846,919,0
+Input,-0.115001,3784,0
+Output,-0.0945349,0.476384,-0.0945356
+Output,-0.0858481,0.478552,-0.0858462
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.10635,Output,-0.0945349,-4.16178e-10
+Input,-0.10635,Output,-0.0858481,-1.64715e-11
+Input,-0.11846,Output,-0.0945349,-1.89094e-10
+Input,-0.11846,Output,-0.0858481,-1.785e-10
+Input,-0.115001,Output,-0.0945349,-1.50136e-10
+Input,-0.115001,Output,-0.0858481,5.44901e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0996001,37,6.92834e-310
+Input,-0.113406,3198,0
+Input,-0.111734,4324,0
+Output,-0.080767,0.47982,-0.0807635
+Output,-0.095494,0.476144,-0.0954966
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0996001,Output,-0.080767,-4.73484e-10
+Input,-0.0996001,Output,-0.095494,3.69363e-11
+Input,-0.113406,Output,-0.080767,4.39315e-10
+Input,-0.113406,Output,-0.095494,-4.50307e-10
+Input,-0.111734,Output,-0.080767,4.88343e-10
+Input,-0.111734,Output,-0.095494,-2.77039e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.116892,15,0
+Input,-0.0996609,370,0
+Input,-0.087342,1413,0
+Output,-0.107226,0.473219,-0.107226
+Output,-0.0975805,0.475624,-0.0975798
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.116892,Output,-0.107226,1.67529e-10
+Input,-0.116892,Output,-0.0975805,2.97544e-11
+Input,-0.0996609,Output,-0.107226,-2.8018e-11
+Input,-0.0996609,Output,-0.0975805,-1.61185e-11
+Input,-0.087342,Output,-0.107226,-2.88582e-10
+Input,-0.087342,Output,-0.0975805,4.832e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0962188,26,0
+Input,-0.0916466,91,0
+Input,-0.119532,3980,0
+Output,-0.11414,0.471496,-0.114138
+Output,-0.11212,0.472,-0.112119
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0962188,Output,-0.11414,-3.08386e-11
+Input,-0.0962188,Output,-0.11212,4.27078e-10
+Input,-0.0916466,Output,-0.11414,2.94196e-10
+Input,-0.0916466,Output,-0.11212,-5.14715e-10
+Input,-0.119532,Output,-0.11414,3.03264e-10
+Input,-0.119532,Output,-0.11212,9.7457e-11
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.111387,56,6.92834e-310
+Input,-0.11216,1873,0
+Input,-0.0995147,1862,0
+Output,-0.105383,0.473679,-0.105382
+Output,-0.112565,0.471888,-0.112565
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.111387,Output,-0.105383,4.27324e-11
+Input,-0.111387,Output,-0.112565,9.42885e-11
+Input,-0.11216,Output,-0.105383,5.62308e-10
+Input,-0.11216,Output,-0.112565,-4.21147e-10
+Input,-0.0995147,Output,-0.105383,6.46475e-11
+Input,-0.0995147,Output,-0.112565,4.4925e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0814077,70,6.92833e-310
+Input,-0.0864514,2996,0
+Input,-0.112603,2281,0
+Output,-0.101202,0.474721,-0.101202
+Output,-0.102741,0.474337,-0.102743
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0814077,Output,-0.101202,5.39071e-10
+Input,-0.0814077,Output,-0.102741,4.10514e-10
+Input,-0.0864514,Output,-0.101202,5.62229e-10
+Input,-0.0864514,Output,-0.102741,-5.28764e-10
+Input,-0.112603,Output,-0.101202,-5.64763e-10
+Input,-0.112603,Output,-0.102741,-2.17343e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.107145,5,0.472
+Input,-0.0895378,925,0
+Input,-0.0954118,2084,0
+Output,-0.0975549,0.475631,-0.0975549
+Output,-0.096991,0.475771,-0.0969915
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.107145,Output,-0.0975549,-1.6604e-10
+Input,-0.107145,Output,-0.096991,6.70109e-11
+Input,-0.0895378,Output,-0.0975549,1.31617e-10
+Input,-0.0895378,Output,-0.096991,5.69467e-10
+Input,-0.0954118,Output,-0.0975549,-6.97517e-11
+Input,-0.0954118,Output,-0.096991,-4.55148e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.11546,27,229
+Input,-0.102664,336,0
+Input,-0.111553,1505,0
+Output,-0.107256,0.473212,-0.107257
+Output,-0.111586,0.472132,-0.111586
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.11546,Output,-0.107256,4.76631e-10
+Input,-0.11546,Output,-0.111586,4.09914e-10
+Input,-0.102664,Output,-0.107256,-1.69188e-10
+Input,-0.102664,Output,-0.111586,-3.38612e-10
+Input,-0.111553,Output,-0.107256,-1.81356e-10
+Input,-0.111553,Output,-0.111586,-1.08728e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.0996795,46,0
+Input,-0.102927,1729,0
+Input,-0.100784,1313,0
+Output,-0.11791,0.470557,-0.11791
+Output,-0.110165,0.472487,-0.110165
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.0996795,Output,-0.11791,-4.3312e-10
+Input,-0.0996795,Output,-0.110165,5.20927e-10
+Input,-0.102927,Output,-0.11791,3.74512e-10
+Input,-0.102927,Output,-0.110165,-1.87144e-10
+Input,-0.100784,Output,-0.11791,1.12465e-10
+Input,-0.100784,Output,-0.110165,2.76831e-10
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.105641,57,0
+Input,-0.105726,124,0
+Input,-0.080157,3895,0
+Output,-0.0928115,0.476813,-0.0928132
+Output,-0.0837389,0.479078,-0.0837388
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.105641,Output,-0.0928115,2.03116e-10
+Input,-0.105641,Output,-0.0837389,-1.47184e-11
+Input,-0.105726,Output,-0.0928115,4.82895e-10
+Input,-0.105726,Output,-0.0837389,-4.86036e-10
+Input,-0.080157,Output,-0.0928115,-4.44979e-10
+Input,-0.080157,Output,-0.0837389,5.0085e-11
+Network
+Neuron Type,Bias,Activation,State
+Input,-0.107021,82,0
+Input,-0.104811,545,0
+Input,-0.0829808,3814,0
+Output,-0.089673,0.477596,-0.089675
+Output,-0.0867567,0.478325,-0.0867558
+
+Connections
+From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight
+Input,-0.107021,Output,-0.089673,-3.86591e-10
+Input,-0.107021,Output,-0.0867567,-3.80749e-10
+Input,-0.104811,Output,-0.089673,-2.56696e-10
+Input,-0.104811,Output,-0.0867567,-2.92083e-10
+Input,-0.0829808,Output,-0.089673,-4.72762e-10
+Input,-0.0829808,Output,-0.0867567,2.67779e-10
