@@ -50,36 +50,9 @@ int main()
         for(int i = 0; i < n;i++)
         {
             cin >> v;
-            vec[i] = v;
+            vec[i] = v; 
         }
-        for(int i = 0; i < 10; i++)
-        {
-            vis[i] = -1;   
-        }
-        for(int i = 1; i < n; i++)
-        {
-            // cout << abs(vec[i] - vec[i - 1]) <<endl;
-            vis[abs(vec[i] - vec[i - 1])]+=1;
-        }
-        // for(int i = 0 ;i < 10; i++)
-        // {
-        //     cout <<vis[i] << " ";
-        // }
-        // cout << endl;
-        int min=10, max=-1;
-        for(int i = 0; i < 10; i++)
-        {
-            if (vis[i] != -1)
-            {
-                if (vis[i] > max)
-                    max = vis[i] + 1;
-                if (vis[i]< min)
-                    min = vis[i] + 1;
-            }
-        }
-        cout << min << " " << max <<endl;
     }
-    // cout << store << endl;
     return 0;
 }
 

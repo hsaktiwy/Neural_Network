@@ -10,6 +10,7 @@
 #include <numeric>
 #include <memory>
 #include <sstream>
+#include <unordered_map>
 #define endl '\n'
 using namespace std;
 
@@ -24,6 +25,14 @@ enum NType {
     Hidden
 };
 
+enum GenType {
+    Weight,
+    bias,
+    HiddenNode,
+    Input,
+    Output
+};
+
 class Neuron;
 class NLink {
 public:
@@ -35,18 +44,30 @@ public:
     NLink(Neuron& f, Neuron& t, double w) : from(f), to(t), weight(w) {}
 };
 
+struct Gen
+{
+    string gene_id;
+    GenType gene_type;
+    int layer; // this if it a hidden Node adding
+    Neuron *from_neuron;
+    Neuron *to_neuron;
+    int value; // for bias or weight
+};
+
 class Neuron {
 public:
+    
     double bias;
     double state;
-    int innovation;
+    int index;
+    int layer;
     double activation; // this is the value of the input that was tested 
     double (*activation_function)(double);
     NType type;
     deque<NLink*> in; // Incoming connections
     deque<NLink*> out; // Outgoing connections
 
-    Neuron(NType t, double b, double (*act)(double)) : type(t), bias(b), activation_function(act) {}
+    Neuron(NType t, double b, double (*act)(double), int id, int l) : type(t), bias(b), activation_function(act), index(id), layer(l) {}
     /* @brief: activate neuron
     *   this function will calculate the input value passed to the neuron
     *   after activating the network
@@ -59,16 +80,20 @@ public:
         cerr << "Calculated State : " << state << endl;
         activation = activation_function(state); // Apply activation function
     }
+
 };
 
 class Network {
 public:
+    vector<int> layers;
+    unordered_map<string, Gen> gens;
     deque<Neuron> neurons;
     deque<NLink> links;
     int inputSize;
     int outputSize;
     deque<Neuron*> inputNeuron; // Store indices instead of references
     deque<Neuron*> outputNeuron;
+    int score = 0;
 
     Network(int inSize, int outSize) : inputSize(inSize), outputSize(outSize) {
         createInitialNodes();
@@ -101,6 +126,11 @@ public:
           outputData.push_back(neuron->activation);
       }
       return outputData;
+    }
+
+    void addGen(Gen &instance)
+    {
+        gens[instance.gene_id] = instance;
     }
 
     void displayNetworkInfo() {
@@ -157,25 +187,42 @@ private:
     void createInitialNodes() {
         mt19937 en(rand());
         uniform_real_distribution<> dis(-0.1, 0.1);
+        layers.push_back(0);
+        layers.push_back(0);
         for (int i = 0; i < inputSize; i++) {
-            neurons.emplace_back(Sensor, dis(en) * 0.2 - 0.1, sigmoid);
+            neurons.emplace_back(Sensor, dis(en) * 0.2 - 0.1, sigmoid, i ,0);
             inputNeuron.push_back(&neurons.back());
+            layers[0]++;
+            string gen_id = "I_";
+            gen_id += (char(i + 48));
+            Gen gen = {gen_id, Input, 0, NULL, NULL, neurons.back().bias};
+            gens[gen_id] = gen; 
         }
         for (int i = 0; i < outputSize; i++) {
-            neurons.emplace_back(Output, dis(en) * 0.2 - 0.1, sigmoid);
+            neurons.emplace_back(Output, dis(en) * 0.2 - 0.1, sigmoid, i , 1);
             outputNeuron.push_back(&neurons.back());
+            layers[1]++;
+            string gen_id = "O_";
+            gen_id += (char(i + 48));
+            Gen gen = {gen_id, Input, 0, NULL, NULL, neurons.back().bias};
+            gens[gen_id] = gen;
         }
     }
 
     void connectInitialNodes() {
         mt19937 en(rand());
         uniform_real_distribution<> dis(-0.5, 0.5);
+
         for (int i = 0; i < inputSize; i++) {
             for (int j = 0; j < outputSize; j++) {
-                float weight = static_cast<float>(dis(en)) / RAND_MAX * sqrt(2.0 / inputSize) * inputSize;
-                links.emplace_back(neurons[i], neurons[inputSize + j], weight);
-                neurons[inputSize + j].in.push_back(&links.back());
-                neurons[i].out.push_back(&links.back());
+                if (dis(en) > 0.0)
+                {
+                    
+                    float weight = static_cast<float>(dis(en)) / RAND_MAX * sqrt(2.0 / inputSize) * inputSize;
+                    links.emplace_back(neurons[i], neurons[inputSize + j], weight);
+                    neurons[inputSize + j].in.push_back(&links.back());
+                    neurons[i].out.push_back(&links.back());
+                }
             }
         }
     }
@@ -189,6 +236,26 @@ Network buildNetwork(int inputSize, int outputSize)
         throw "buildNetwork : inputSize || outputSize == 0\n";
     }
     return (Network {inputSize, outputSize});
+}
+
+tuple<unordered_map<string, Gen>, unordered_map<string, Gen>, unordered_map<string, Gen>> gen_recognizer(const Network& dominantParent, const Network& weakParent)
+{
+    unordered_map<string, Gen> matchedGen, unmatchedDominant, unmatchedWeak;
+    for (const auto& [gene_id, gene] : dominantParent.gens) {
+        auto it = weakParent.gens.find(gene_id);
+        if (it != weakParent.gens.end()) {
+            matchedGen[gene_id] = gene;
+        } else {
+            unmatchedDominant[gene_id] = gene;
+        }
+    }
+
+    for (const auto& [gene_id, gene] : weakParent.gens) {
+        if (dominantParent.gens.find(gene_id) == dominantParent.gens.end()) {
+            unmatchedWeak[gene_id] = gene;
+        }
+    }
+    return {matchedGen, unmatchedDominant, unmatchedWeak};
 }
 
 // ##################################################################
@@ -323,7 +390,21 @@ thread_local typename GeneticAlgorithm<Gene>::RandomGenerator GeneticAlgorithm<G
 // ##################################################################
 // ##################################################################
 
+// function<Individual()> genIndividual,
+Network CreatIndividual(void)
+{
+    return (Network (3, 2));
+}
+// function<Individual(const Individual&, const Individual&)> crossFunc,
+Network crossOver(const Network& p1, const Network& p2)
+{
+    const Network &DominantParent = (p1.score > p2.score) ? p1 : p2;
 
+
+}
+// function<void(Individual&)> mutFunc,
+
+// function<double(const Individual&)> fitFunc,
 
 // ##################################################################
 // ##################################################################
