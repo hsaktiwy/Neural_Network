@@ -11,10 +11,12 @@
 #include <memory>
 #include <sstream>
 #include <unordered_map>
+#include <array>
 #define endl '\n'
 using namespace std;
 
 // Correct sigmoid function
+
 double sigmoid(double x) {
     return 1.0 / (1.0 + exp(-x));
 }
@@ -44,7 +46,7 @@ public:
     NLink(Neuron& f, Neuron& t, double w) : from(f), to(t), weight(w) {}
 };
 
-struct Gen
+typedef struct t_Gen
 {
     string gene_id;
     GenType gene_type;
@@ -52,7 +54,8 @@ struct Gen
     Neuron *from_neuron;
     Neuron *to_neuron;
     int value; // for bias or weight
-};
+    int index;
+} _Gen;
 
 class Neuron {
 public:
@@ -85,8 +88,9 @@ public:
 
 class Network {
 public:
-    vector<int> layers;
-    unordered_map<string, Gen> gens;
+    static constexpr size_t MAX_LAYER = 128;
+    array<int, MAX_LAYER> layers{};
+    unordered_map<string, _Gen> gens;
     deque<Neuron> neurons;
     deque<NLink> links;
     int inputSize;
@@ -98,6 +102,39 @@ public:
     Network(int inSize, int outSize) : inputSize(inSize), outputSize(outSize) {
         createInitialNodes();
         connectInitialNodes();
+    }
+
+    Network(const vector<_Gen> &Gens)
+    {
+        for (auto& gen: Gens)
+        {
+            if (gen.gene_type != Weight)
+            {
+                neurons.emplace_back(gen.gene_type, gen.value, sigmoid, gen.index , gen.layer);
+                if (gen.gene_type == Input)
+                    inputNeuron.push_back(&neurons.back());
+                if (gen.gene_type == Output)
+                    outputNeuron.push_back(&neurons.back());
+                gens[gen.gene_id] = gen;
+                layers[gen.layer]++;
+            }
+        }
+        for (auto& gen: Gens)
+        {
+            if (gen.gene_type == Weight)
+            {
+                links.emplace_back(*(gen.from_neuron), *(gen.to_neuron), gen.value);
+                Neuron *tmp = gen.to_neuron;
+                auto it1= find_if(neurons.begin(), neurons.end(), [tmp](Neuron &a){ return (tmp->index == a.index && tmp->layer == a.layer);});
+                if (it1 != neurons.end())
+                    it1->in.push_back(&links.back());
+                tmp = gen.from_neuron;
+                auto it2 = find_if(neurons.begin(), neurons.end(), [tmp](Neuron &a){ return (tmp->index == a.index && tmp->layer == a.layer);});
+                if (it2 != neurons.end())
+                    it2->out.push_back(&links.back());
+                gens[gen.gene_id] = gen;
+            }
+        }
     }
 
     deque<double> activate(deque<double> &input)
@@ -128,7 +165,7 @@ public:
       return outputData;
     }
 
-    void addGen(Gen &instance)
+    void addGen(_Gen &instance)
     {
         gens[instance.gene_id] = instance;
     }
@@ -187,15 +224,13 @@ private:
     void createInitialNodes() {
         mt19937 en(rand());
         uniform_real_distribution<> dis(-0.1, 0.1);
-        layers.push_back(0);
-        layers.push_back(0);
         for (int i = 0; i < inputSize; i++) {
             neurons.emplace_back(Sensor, dis(en) * 0.2 - 0.1, sigmoid, i ,0);
             inputNeuron.push_back(&neurons.back());
             layers[0]++;
             string gen_id = "I_";
             gen_id += (char(i + 48));
-            Gen gen = {gen_id, Input, 0, NULL, NULL, neurons.back().bias};
+            _Gen gen = {gen_id, Input, 0, NULL, NULL, neurons.back().bias, neurons.back().index};
             gens[gen_id] = gen; 
         }
         for (int i = 0; i < outputSize; i++) {
@@ -204,7 +239,7 @@ private:
             layers[1]++;
             string gen_id = "O_";
             gen_id += (char(i + 48));
-            Gen gen = {gen_id, Input, 0, NULL, NULL, neurons.back().bias};
+            _Gen gen = {gen_id, Input, 1, NULL, NULL, neurons.back().bias, neurons.back().index};
             gens[gen_id] = gen;
         }
     }
@@ -217,11 +252,14 @@ private:
             for (int j = 0; j < outputSize; j++) {
                 if (dis(en) > 0.0)
                 {
-                    
                     float weight = static_cast<float>(dis(en)) / RAND_MAX * sqrt(2.0 / inputSize) * inputSize;
                     links.emplace_back(neurons[i], neurons[inputSize + j], weight);
                     neurons[inputSize + j].in.push_back(&links.back());
                     neurons[i].out.push_back(&links.back());
+                    string gen_id = "L_";
+                    gen_id += (char(i + 48))+ '_' + (char(j + 48)) + "_1";
+                    _Gen gen = {gen_id, Weight, 0, &neurons[i], &neurons[inputSize + j], weight, -1};
+                    gens[gen_id] = gen;
                 }
             }
         }
@@ -238,9 +276,9 @@ Network buildNetwork(int inputSize, int outputSize)
     return (Network {inputSize, outputSize});
 }
 
-tuple<unordered_map<string, Gen>, unordered_map<string, Gen>, unordered_map<string, Gen>> gen_recognizer(const Network& dominantParent, const Network& weakParent)
+tuple<unordered_map<string, _Gen>, unordered_map<string, _Gen>, unordered_map<string, _Gen>> gen_recognizer(const Network& dominantParent, const Network& weakParent)
 {
-    unordered_map<string, Gen> matchedGen, unmatchedDominant, unmatchedWeak;
+    unordered_map<string, _Gen> matchedGen, unmatchedDominant, unmatchedWeak;
     for (const auto& [gene_id, gene] : dominantParent.gens) {
         auto it = weakParent.gens.find(gene_id);
         if (it != weakParent.gens.end()) {
@@ -399,8 +437,20 @@ Network CreatIndividual(void)
 Network crossOver(const Network& p1, const Network& p2)
 {
     const Network &DominantParent = (p1.score > p2.score) ? p1 : p2;
-
-
+    const Network &WeakParent = (p1.score < p2.score) ? p1 : p2;
+    auto [matchedGen, unmatchedDominant, unmatchedWeak] = gen_recognizer(DominantParent, WeakParent);
+    std::deque<_Gen> all_unmatched;
+    for (const auto& [_, gene] : unmatchedDominant) all_unmatched.push_back(gene);
+    for (const auto& [_, gene] : unmatchedWeak) all_unmatched.push_back(gene);
+    mt19937 en(rand());
+    uniform_real_distribution<> dis(-0.5, 0.5);
+    shuffle(all_unmatched.begin(), all_unmatched.end(), en);
+    std::vector<_Gen> gens;
+    for (const auto& gene : all_unmatched) {
+        if (dis(en) > 0)
+            gens.push_back(gene);
+    }
+    return (Network (gens));
 }
 // function<void(Individual&)> mutFunc,
 
