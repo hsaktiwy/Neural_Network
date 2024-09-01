@@ -53,7 +53,7 @@ typedef struct t_Gen
     int layer; // this if it a hidden Node adding
     Neuron *from_neuron;
     Neuron *to_neuron;
-    int value; // for bias or weight
+    double value; // for bias or weight
     int index;
 } _Gen;
 
@@ -80,7 +80,7 @@ public:
         for (const auto& link : in) {
             state += link->from.activation * link->weight;
         }
-        cerr << "Calculated State : " << state << endl;
+        // cerr << "Calculated State : " << state << endl;
         activation = activation_function(state); // Apply activation function
     }
 
@@ -90,6 +90,7 @@ class Network {
 public:
     static constexpr size_t MAX_LAYER = 128;
     array<int, MAX_LAYER> layers{};
+    array<deque<Neuron*>, MAX_LAYER> layers_Neurons{};
     unordered_map<string, _Gen> gens;
     deque<Neuron> neurons;
     deque<NLink> links;
@@ -110,11 +111,19 @@ public:
         {
             if (gen.gene_type != Weight)
             {
-                neurons.emplace_back(gen.gene_type, gen.value, sigmoid, gen.index , gen.layer);
+                neurons.emplace_back(static_cast<NType>(gen.gene_type), gen.value, sigmoid, gen.index , gen.layer);
                 if (gen.gene_type == Input)
+                {
                     inputNeuron.push_back(&neurons.back());
+                    layers_Neurons[gen.layer].push_back(&neurons.back());
+                    inputSize++;
+                }
                 if (gen.gene_type == Output)
+                {
                     outputNeuron.push_back(&neurons.back());
+                    layers_Neurons[gen.layer].push_back(&neurons.back());
+                    outputSize++;
+                }
                 gens[gen.gene_id] = gen;
                 layers[gen.layer]++;
             }
@@ -141,7 +150,7 @@ public:
     {
       // check if the network dimension inputs match the input provided as paramiter
       if (input.size() != inputNeuron.size())
-        throw "Error: input != inputNeuron in Network::activate\n";
+        throw runtime_error("Error: input size doesn't match inputNeuron size in Network::activate");
       // let activate the input first
       for (int i = 0; i < inputNeuron.size(); i++)
       {
@@ -152,7 +161,7 @@ public:
       {
         if (neu.type != Sensor)
         {
-            cout << "whaaaaaaaaaaaa\n";
+            // cou t << "whaaaaaaaaaaaa\n";
             neu.activate();
         }
       }
@@ -437,23 +446,57 @@ Network CreatIndividual(void)
 Network crossOver(const Network& p1, const Network& p2)
 {
     const Network &DominantParent = (p1.score > p2.score) ? p1 : p2;
-    const Network &WeakParent = (p1.score < p2.score) ? p1 : p2;
+    const Network &WeakParent = (p1.score <= p2.score) ? p1 : p2;
     auto [matchedGen, unmatchedDominant, unmatchedWeak] = gen_recognizer(DominantParent, WeakParent);
-    std::deque<_Gen> all_unmatched;
+    vector<_Gen> gens;
+    gens.reserve(matchedGen.size() + unmatchedDominant.size() + unmatchedWeak.size());
+    // Add all matched genes
+    for (const auto& [_, gene] : matchedGen) {
+        gens.push_back(gene);
+    }
+    vector<_Gen> all_unmatched;
+    all_unmatched.reserve(unmatchedDominant.size() + unmatchedWeak.size());
     for (const auto& [_, gene] : unmatchedDominant) all_unmatched.push_back(gene);
     for (const auto& [_, gene] : unmatchedWeak) all_unmatched.push_back(gene);
     mt19937 en(rand());
-    uniform_real_distribution<> dis(-0.5, 0.5);
+    uniform_real_distribution<> dis(0, 1);
     shuffle(all_unmatched.begin(), all_unmatched.end(), en);
-    std::vector<_Gen> gens;
     for (const auto& gene : all_unmatched) {
-        if (dis(en) > 0)
+        if (dis(en) > 0.5)
             gens.push_back(gene);
     }
     return (Network (gens));
 }
 // function<void(Individual&)> mutFunc,
 
+void mutFunc(Network& member)
+{
+    mt19937 en(rand());
+    uniform_real_distribution<> dis(0, 1);
+    bool mutate = false;
+    mutate = dis(en) < 0.02;
+    // add node (we can call this like a expensive evolution operation,
+      //so could we drop it rate more like what happen in nature ?)
+        // define the possiton  where we will add the node in case we wont to build new layer or not ?
+        if (mutate)
+        {
+            int newLayerIndex =  1 + std::uniform_int_distribution<>(0, member.layers.size() - 2)(en);
+            member.neurons.emplace_back(Hidden, dis(en) * 2 - 1, sigmoid, member.layers[newLayerIndex], newLayerIndex);
+            member.layers[newLayerIndex]++;
+            // find the before layer
+
+            // find the after layer
+            // creat neutral link in between
+        }
+    // extract node
+        // define the node that we wont to delete plus we need to delete all connection related to it
+    // add link 
+        // add link between 2 existing nodes
+    // extract link
+        // extract link between 2 existing nodes
+    // weight modification (we will apply simulation anealing),
+    // i think about using a temperature?
+}
 // function<double(const Individual&)> fitFunc,
 
 // ##################################################################
