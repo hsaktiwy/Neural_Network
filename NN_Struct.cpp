@@ -42,8 +42,12 @@ public:
     Neuron& to;// Recipient neuron index
     double weight;// Weight of the link
     int innovation; // Innovation number
-
-    NLink(Neuron& f, Neuron& t, double w) : from(f), to(t), weight(w) {}
+    bool active;
+    NLink(Neuron& f, Neuron& t, double w) : from(f), to(t), weight(w), active(true)  {}
+    void  disable()
+    {
+        active = false;
+    }
 };
 
 typedef struct t_Gen
@@ -60,6 +64,7 @@ typedef struct t_Gen
 class Neuron {
 public:
     
+    int active;// this can determine if it in the equation or not (deleted)
     double bias;
     double state;
     int index;
@@ -67,10 +72,10 @@ public:
     double activation; // this is the value of the input that was tested 
     double (*activation_function)(double);
     NType type;
-    deque<NLink*> in; // Incoming connections
-    deque<NLink*> out; // Outgoing connections
+    deque<NLink*> in;// Incoming connections
+    deque<NLink*> out;// Outgoing connections
 
-    Neuron(NType t, double b, double (*act)(double), int id, int l) : type(t), bias(b), activation_function(act), index(id), layer(l) {}
+    Neuron(NType t, double b, double (*act)(double), int id, int l) : type(t), bias(b), activation_function(act), index(id), layer(l), active(true) {}
     /* @brief: activate neuron
     *   this function will calculate the input value passed to the neuron
     *   after activating the network
@@ -88,7 +93,7 @@ public:
 
 class Network {
 public:
-    static constexpr size_t MAX_LAYER = 128;
+    static constexpr size_t MAX_LAYER = 1000;
     array<int, MAX_LAYER> layers{};
     array<deque<Neuron*>, MAX_LAYER> layers_Neurons{};
     unordered_map<string, _Gen> gens;
@@ -236,6 +241,7 @@ private:
         for (int i = 0; i < inputSize; i++) {
             neurons.emplace_back(Sensor, dis(en) * 0.2 - 0.1, sigmoid, i ,0);
             inputNeuron.push_back(&neurons.back());
+            layers_Neurons[0].push_back(&neurons.back());
             layers[0]++;
             string gen_id = "I_";
             gen_id += (char(i + 48));
@@ -244,6 +250,7 @@ private:
         }
         for (int i = 0; i < outputSize; i++) {
             neurons.emplace_back(Output, dis(en) * 0.2 - 0.1, sigmoid, i , 1);
+            layers_Neurons[1].push_back(&neurons.back());
             outputNeuron.push_back(&neurons.back());
             layers[1]++;
             string gen_id = "O_";
@@ -474,7 +481,7 @@ void mutFunc(Network& member)
     mt19937 en(rand());
     uniform_real_distribution<> dis(0, 1);
     bool mutate = false;
-    mutate = dis(en) < 0.02;
+    mutate = dis(en) < 0.05;
     // add node (we can call this like a expensive evolution operation,
       //so could we drop it rate more like what happen in nature ?)
         // define the possiton  where we will add the node in case we wont to build new layer or not ?
@@ -483,14 +490,17 @@ void mutFunc(Network& member)
             int newLayerIndex =  1 + std::uniform_int_distribution<>(0, member.layers.size() - 2)(en);
             member.neurons.emplace_back(Hidden, dis(en) * 2 - 1, sigmoid, member.layers[newLayerIndex], newLayerIndex);
             member.layers[newLayerIndex]++;
-            // find the before layer
-
-            // find the after layer
-            // creat neutral link in between
+            // add the gens
         }
+    mutate = dis(en) < 0.01;
     // extract node
         // define the node that we wont to delete plus we need to delete all connection related to it
-    // add link 
+        if (mutate)
+        {
+
+        }
+    // add link
+    mutate = dis(en) < 0.02;
         // add link between 2 existing nodes
     // extract link
         // extract link between 2 existing nodes
