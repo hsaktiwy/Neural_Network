@@ -40,9 +40,9 @@ public:
     Neuron& from;// Source neuron index
     Neuron& to;// Recipient neuron index
     double weight;// Weight of the link
-    int innovation; // Innovation number
+    string innovation; // Innovation number
     bool active;
-    NLink(Neuron& f, Neuron& t, double w) : from(f), to(t), weight(w), active(true)  {}
+    NLink(Neuron& f, Neuron& t, double w, string &ino) : from(f), to(t), weight(w), innovation(ino), active(true) {}
     void  disable()
     {
         active = false;
@@ -121,10 +121,24 @@ public:
     *   this function will calculate the input value passed to the neuron
     *   after activating the network
     */
+    void disable()
+    {
+        active = false;
+    }
+
+    bool operator<(const Neuron& op)
+    {
+        if (layer != op.layer) {
+            return layer < op.layer;
+        }
+        return index < op.index;
+    }
+
     void activate(void) {
         state = bias; // Start with the bias
         for (const auto& link : in) {
-            state += link->from.activation * link->weight;
+            if (link->active)
+                state += link->from.activation * link->weight;
         }
         // cerr << "Calculated State : " << state << endl;
         activation = activation_function(state); // Apply activation function
@@ -178,46 +192,52 @@ public:
         {
             if (gen.gen_type == Weight)
             {
-                links.emplace_back(*(gen.fromNeuron), *(gen.toNeuron), gen.value);
-                Neuron *tmp = gen.toNeuron;
-                auto it1= find_if(neurons.begin(), neurons.end(), [tmp](Neuron &a){ return (tmp->index == a.index && tmp->layer == a.layer);});
-                if (it1 != neurons.end())
-                    it1->in.push_back(&links.back());
-                tmp = gen.fromNeuron;
-                auto it2 = find_if(neurons.begin(), neurons.end(), [tmp](Neuron &a){ return (tmp->index == a.index && tmp->layer == a.layer);});
-                if (it2 != neurons.end())
-                    it2->out.push_back(&links.back());
-                gens[gen.gen_id] = gen;
+                Neuron *from = gen.fromNeuron, *to = gen.toNeuron;
+                if (from != NULL && to != NULL)
+                {
+                    auto it_from= find_if(neurons.begin(), neurons.end(), [from](Neuron &a){ return (from->index == a.index && from->layer == a.layer);});
+                    auto it_to = find_if(neurons.begin(), neurons.end(), [to](Neuron &a){ return (to->index == a.index && to->layer == a.layer);});
+                    if (it_from != neurons.end() && it_to != neurons.end())
+                    {
+                        links.emplace_back(it_from, it_to, gen.value, gen.gen_id);
+                        it_to->in.push_back(&links.back());
+                        it_from->out.push_back(&links.back());
+                        gens[gen.gen_id] = gen;
+                    }
+                }
             }
         }
     }
 
+
     deque<double> activate(deque<double> &input)
     {
-      // check if the network dimension inputs match the input provided as paramiter
-      if (input.size() != inputNeuron.size())
-        throw runtime_error("Error: input size doesn't match inputNeuron size in Network::activate");
-      // let activate the input first
-      for (int i = 0; i < inputNeuron.size(); i++)
-      {
-          inputNeuron[i]->activation = input[i];
-      }
-      // activate the neuron that are not inputs
-      for (auto& neu:neurons)
-      {
+        // sort neurons before they will be surely sorted by there layer so no need to there index cause it want gave diffrence in the network to pology
+        sort(neurons.begin(), neurons.end());
+        // check if the network dimension inputs match the input provided as paramiter
+        if (input.size() != inputNeuron.size())
+            throw runtime_error("Error: input size doesn't match inputNeuron size in Network::activate");
+        // let activate the input first
+        for (int i = 0; i < inputNeuron.size(); i++)
+        {
+            inputNeuron[i]->activation = input[i];
+        }
+        // activate the neuron that are not inputs
+        for (auto& neu:neurons)
+        {
         if (neu.type != Sensor)
         {
-            // cou t << "whaaaaaaaaaaaa\n";
-            neu.activate();
+            if (neu.active)
+                neu.activate();
         }
-      }
-      // collect the ouput data
-      deque<double> outputData;
-      for(const auto& neuron : outputNeuron)
-      {
-          outputData.push_back(neuron->activation);
-      }
-      return outputData;
+        }
+        // collect the ouput data
+        deque<double> outputData;
+        for(const auto& neuron : outputNeuron)
+        {
+            outputData.push_back(neuron->activation);
+        }
+        return outputData;
     }
 
     void addGen(_Gen &instance)
@@ -275,18 +295,29 @@ public:
         cout << "Network information has been written to " << filename << endl;
     }
 
-    void RegistrateGen(string &gen_id, GenType type, int layer, Neuron *from_neuron, Neuron *to_neuron, double value, int index)
+    void RegistrateGen(string &gen_id, GenType type, double value, int layerFrom, int indexFrom,int layerTo=-1, int indexTo=-1,Neuron *from_neuron=NULL, Neuron *to_neuron=NULL)
     {
         if (PGensRegister.count(gen_id) == 0)
         {
-            _Gen gen = {gen_id, type, value,  index, layer};
-            gens[gen_id] = gen;
-            gens[gen_id].setNeurons(from_neuron, to_neuron);
-            PGensRegister[gen_id] = gen;
+            if (type != Weight)
+            {
+                _Gen gen = {gen_id, type, value,  indexFrom, layerFrom};
+                gens[gen_id] = gen;
+                gens[gen_id].setNeurons(from_neuron, to_neuron);
+                PGensRegister[gen_id] = gen;
+            }
+            else
+            {
+                _Gen gen = {gen_id, type, value,  indexFrom, layerFrom, layerTo, indexTo};
+                gens[gen_id] = gen;
+                gens[gen_id].setNeurons(from_neuron, to_neuron);
+                PGensRegister[gen_id] = gen;
+            }
         }
         else
         {
-            gens[gen_id] =  PGensRegister[gen_id];
+            gens[gen_id] = PGensRegister[gen_id];
+            gens[gen_id].setNeurons(from_neuron, to_neuron);
             gens[gen_id].value = value;
         }
     }
@@ -324,7 +355,7 @@ public:
         string gen_id;
         GenIdGenerator(gen_id, HiddenNode, layers[layer], layer);
         neurons.emplace_back(Hidden, bias, act, layers[layer], layer, gen_id);
-        RegistrateGen(gen_id, HiddenNode, layer, NULL, NULL, bias, layers[layer]);
+        RegistrateGen(gen_id, HiddenNode, bias, layer, layers[layer]);
         layers[layer]++;
     }
 
@@ -333,13 +364,73 @@ public:
         auto it = find_if(neurons.begin(), neurons.end(), [layer, index](Neuron &a){ return (index == a.index && layer == a.layer);});
         if (it != neurons.end())
         {
-            it->active = false;
-
+            it->disable();
+            for (auto in : it->in)
+            {
+                if (in)
+                    in->disable();
+            }
+            for (auto in : it->in)
+            {
+                if (in)
+                    in->disable();
+            }
         }
     }
 
-    void addLink();
-    void DeleteLink();
+    bool isValidConnection(Neuron **f, Neuron **t)
+    {
+        if (((*f)->type == Input && (*t)->type == Input) || ((*f)->type == Output && (*t)->type == Output) || ((*f)->type == Hidden && (*t)->type == Hidden && (*f)->layer == (*t)->layer))
+            return false;
+        if ((((*f)->type == Hidden || (*f)->type == Output) && ((*t)->type == Input || (*t)->type == Output)) || ((*f)->type == Hidden && (*t)->type == Hidden && (*t)->layer < (*f)->layer))
+        {
+            Neuron *tmp;
+            tmp = *f;
+            (*f) = (*t);
+            (*t) = tmp;
+        }
+        return true;
+    }
+
+    void addLink( void )
+    {
+        string gen_id;
+        Neuron *n1;
+        Neuron *n2;
+        // this will check if that we did already create all possible links
+        size_t PossibleLinksNumber = size_t((neurons.size() * ((neurons.size() - 1) / 2.0)));
+        if (links.size() >= PossibleLinksNumber)
+            return ;
+        while (gens.count(gen_id) != 0 || gen_id == "")
+        {
+            gen_id.clear();
+            int r1 = rand()% neurons.size();
+            int r2 = rand()% neurons.size();
+
+            n1 = &neurons[r1];
+            n2 = &neurons[r2];
+            if (isValidConnection(&n1, &n2)) {
+                GenIdGenerator(gen_id, Weight, n1->index, n1->layer, n2->index, n2->layer);
+            }
+        }
+        mt19937 en(rand());
+        uniform_real_distribution<> dis(-0.1, 0.1);
+        float weight = static_cast<float>(dis(en)) / RAND_MAX * sqrt(2.0 / inputSize) * inputSize;
+        RegistrateGen(gen_id, Weight, weight, n1->layer, n1->index, n2->layer, n2->index, n1, n2);
+        links.emplace_back(n1, n2, weight, gen_id);
+        n2->in.push_back(&links.back());
+        n1->out.push_back(&links.back());
+    }
+
+    void DeleteLink( void )
+    {
+        int r = static_cast<int>(rand() % links.size());
+
+        auto it = links.begin() + r;
+        if (it != links.end())
+            it->disable();
+    }
+
 private:
     void createInitialNodes() {
         mt19937 en(rand());
@@ -352,7 +443,7 @@ private:
             layers_Neurons[0].push_back(&neurons.back());
             layers[0]++;
 
-            RegistrateGen(gen_id, Input, 0, NULL, NULL, neurons.back().bias, neurons.back().index);
+            RegistrateGen(gen_id, Input, neurons.back().bias, 0, neurons.back().index);
         }
         for (int i = 0; i < outputSize; i++) {
             string gen_id;
@@ -361,7 +452,7 @@ private:
             layers_Neurons[1].push_back(&neurons.back());
             outputNeuron.push_back(&neurons.back());
             layers[1]++;
-            RegistrateGen(gen_id, Input, 1, NULL, NULL, neurons.back().bias, neurons.back().index);
+            RegistrateGen(gen_id, Output, neurons.back().bias, 1, neurons.back().index);
         }
     }
 
@@ -376,12 +467,12 @@ private:
                 if (dis(en) > 0.0)
                 {
                     float weight = static_cast<float>(dis(en)) / RAND_MAX * sqrt(2.0 / inputSize) * inputSize;
-                    links.emplace_back(neurons[i], neurons[inputSize + j], weight);
-                    neurons[inputSize + j].in.push_back(&links.back());
-                    neurons[i].out.push_back(&links.back());
                     string gen_id;
                     GenIdGenerator(gen_id, Weight, neurons[i].index, neurons[i].layer, neurons[inputSize + j].index, neurons[inputSize + j].layer);
-                    RegistrateGen(gen_id, Weight, 0, &neurons[i], &neurons[inputSize + j], weight, -1);
+                    links.emplace_back(neurons[i], neurons[inputSize + j], weight, gen_id);
+                    neurons[inputSize + j].in.push_back(&links.back());
+                    neurons[i].out.push_back(&links.back());
+                    RegistrateGen(gen_id, Weight, weight, neurons[i].layer, neurons[i].index, neurons[inputSize + j].layer, neurons[inputSize + j].index, &neurons[i], &neurons[inputSize + j]);
                 }
             }
         }
@@ -397,24 +488,39 @@ Network buildNetwork(int inputSize, int outputSize)
     }
     return (Network {inputSize, outputSize});
 }
+/**
+ * This function was create with the idea that we will need to keep unmatchedWeak parent list of gens
+ * 
+  tuple<unordered_map<string, _Gen>, unordered_map<string, _Gen>, unordered_map<string, _Gen>> gen_recognizer(const Network& dominantParent, const Network& weakParent)
+  {
+      unordered_map<string, _Gen> matchedGen, unmatchedDominant, unmatchedWeak;
+      for (const auto& [gene_id, gene] : dominantParent.gens) {
+          auto it = weakParent.gens.find(gene_id);
+          if (it != weakParent.gens.end()) {
+              (rand()%2 == 0) ? matchedGen[gene_id] = gene : matchedGen[gene_id] = it->second;
+          } else {
+              unmatchedDominant[gene_id] = gene;
+          }
+      }
 
-tuple<unordered_map<string, _Gen>, unordered_map<string, _Gen>, unordered_map<string, _Gen>> gen_recognizer(const Network& dominantParent, const Network& weakParent)
+      for (const auto& [gene_id, gene] : weakParent.gens) {
+          if (dominantParent.gens.find(gene_id) == dominantParent.gens.end()) {
+              unmatchedWeak[gene_id] = gene;
+          }
+      }
+      return {matchedGen, unmatchedDominant, unmatchedWeak};
+  }
+*/
+tuple<unordered_map<string, _Gen>, unordered_map<string, _Gen> > gen_recognizer(const Network& dominantParent, const Network& weakParent)
 {
-    unordered_map<string, _Gen> matchedGen, unmatchedDominant, unmatchedWeak;
+    unordered_map<string, _Gen> matchedGen, unmatched;
     for (const auto& [gene_id, gene] : dominantParent.gens) {
         auto it = weakParent.gens.find(gene_id);
         if (it != weakParent.gens.end()) {
-            matchedGen[gene_id] = gene;
+            (rand()%2 == 0) ? matchedGen[gene_id] = gene : matchedGen[gene_id] = it->second;
         } else {
-            unmatchedDominant[gene_id] = gene;
+            unmatched[gene_id] = gene;
         }
     }
-
-    for (const auto& [gene_id, gene] : weakParent.gens) {
-        if (dominantParent.gens.find(gene_id) == dominantParent.gens.end()) {
-            unmatchedWeak[gene_id] = gene;
-        }
-    }
-    return {matchedGen, unmatchedDominant, unmatchedWeak};
+    return {matchedGen, unmatched};
 }
-
