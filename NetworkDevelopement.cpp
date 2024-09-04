@@ -15,15 +15,15 @@
 #define endl '\n'
 using namespace std;
 
-unordered_map<string, _Gen> PGensRegister;
+
 double sigmoid(double x) {
     return 1.0 / (1.0 + exp(-x));
 }
 
 enum NType {
-    Sensor,
-    Output,
-    Hidden
+    SENSOR,
+    OUTPUT,
+    HIDDEN
 };
 
 enum GenType {
@@ -64,12 +64,19 @@ typedef struct t_Gen
     Neuron *fromNeuron; // Use smart pointers for better memory management
     Neuron *toNeuron;// Use smart pointers for better memory management
     // Constructor for weight and bias genes
+    // Default constructor
+    t_Gen() = default;
     t_Gen(const string& geneId, GenType geneType, double val,  int iFrom, int lFrom, int iTo, int lTo)
         : gen_id(geneId), gen_type(geneType), value(val), indexFrom(iFrom),layerFrom(lFrom),   indexTo(iTo), layerTo(lTo) {}
 
     // Constructor for node genes
-    t_Gen(const string& geneId, GenType geneType, int _value, int index, int layer)
+    t_Gen(const string& geneId, GenType geneType, double _value, int index, int layer)
         : gen_id(geneId), gen_type(geneType), value(_value), indexFrom(index), layerFrom(layer) {}
+    //copy constructor
+    t_Gen(const t_Gen& copy)
+    {
+        *this = copy;
+    }
     // assigne operator
     t_Gen &operator=(const t_Gen& copy)
     {
@@ -100,7 +107,7 @@ typedef struct t_Gen
         toNeuron = From;
     }
 } _Gen;
-
+unordered_map<string, _Gen> PGensRegister;
 class Neuron {
 public:
     
@@ -126,7 +133,7 @@ public:
         active = false;
     }
 
-    bool operator<(const Neuron& op)
+    bool operator<(const Neuron& op) const
     {
         if (layer != op.layer) {
             return layer < op.layer;
@@ -135,7 +142,10 @@ public:
     }
 
     void activate(void) {
-        state = bias; // Start with the bias
+        if (in.size() > 0)
+            state = bias; // Start with the bias
+        else
+            state = 0;
         for (const auto& link : in) {
             if (link->active)
                 state += link->from.activation * link->weight;
@@ -156,22 +166,27 @@ public:
     deque<NLink> links;
     int inputSize;
     int outputSize;
+    int hiddenSize;
     deque<Neuron*> inputNeuron; // Store indices instead of references
     deque<Neuron*> outputNeuron;
-    int score = 0;
+    deque<Neuron*> hiddenNeuron;
 
-    Network(int inSize, int outSize) : inputSize(inSize), outputSize(outSize) {
+    int score = 0;
+    vector<pair<string, _Gen>> SortedGens;
+
+    Network(int inSize, int outSize) : inputSize(inSize), outputSize(outSize), hiddenSize(0) {
         createInitialNodes();
         connectInitialNodes();
     }
 
-    Network(const vector<_Gen> &Gens)
+    Network(vector<_Gen> &Gens)
     {
         for (auto& gen: Gens)
         {
             if (gen.gen_type != Weight)
             {
-                neurons.emplace_back(static_cast<NType>(gen.gen_type), gen.value, sigmoid, gen.indexFrom , gen.layerFrom);
+                NType NeuronType = (gen.gen_type == Output) ? OUTPUT:((gen.gen_type == Input) ? SENSOR: HIDDEN);
+                neurons.emplace_back(NeuronType, gen.value, sigmoid, gen.indexFrom , gen.layerFrom, gen.gen_id);
                 if (gen.gen_type == Input)
                 {
                     inputNeuron.push_back(&neurons.back());
@@ -199,7 +214,7 @@ public:
                     auto it_to = find_if(neurons.begin(), neurons.end(), [to](Neuron &a){ return (to->index == a.index && to->layer == a.layer);});
                     if (it_from != neurons.end() && it_to != neurons.end())
                     {
-                        links.emplace_back(it_from, it_to, gen.value, gen.gen_id);
+                        links.emplace_back(*it_from, *it_to, gen.value, gen.gen_id);
                         it_to->in.push_back(&links.back());
                         it_from->out.push_back(&links.back());
                         gens[gen.gen_id] = gen;
@@ -225,11 +240,11 @@ public:
         // activate the neuron that are not inputs
         for (auto& neu:neurons)
         {
-        if (neu.type != Sensor)
-        {
-            if (neu.active)
-                neu.activate();
-        }
+            if (neu.type != SENSOR)
+            {
+                if (neu.active)
+                    neu.activate();
+            }
         }
         // collect the ouput data
         deque<double> outputData;
@@ -245,20 +260,26 @@ public:
         gens[instance.gen_id] = instance;
     }
 
-    void displayNetworkInfo() {
+    void display() {
         cout << "Network Information:" << endl;
         cout << "Total Neurons: " << neurons.size() << endl;
-        cout << "Input Neurons: " << inputSize << ", Output Neurons: " << outputSize << endl;
-        cout << "deque Input Neurons: " << inputNeuron.size() << ", deque Output Neurons: " << outputNeuron.size() << endl;
+        cout << "Input Neurons: " << inputSize << ", Output Neurons: " << outputSize << ", Hidden Neurons: " << hiddenSize << endl;
+        cout << "deque Input Neurons: " << inputNeuron.size() << ", deque Output Neurons: " << outputNeuron.size() << ", deque Hidden Neurons: " <<  neurons.size() - outputNeuron.size() - inputNeuron.size()<< endl;
         cout << "Input Neuron:\n";
         for (auto& in : inputNeuron)
         {
-          cout << "activation: "<< in->activation << " bias:" << in->bias << " state:" << in->state << endl;
+          cout << "activation: "<< in->activation << " bias:" << in->bias << " state:" << in->state << in->state << " active:"  << in->active << " layer: " << in->layer << " index:" << in->index << endl;
         }
         cout << "Ouput Neuron:\n";
         for (auto& out : outputNeuron)
         {
-          cout << "activation: "<< out->activation << " bias:" << out->bias << " state:" << out->state << endl;
+          cout << "activation: "<< out->activation << " bias:" << out->bias << " state:" << out->state << out->state << " active:"  << out->active << " layer: " << out->layer << " index:" << out->index << endl;
+        }
+        cout << "Hidden Neurons\n";
+        for(auto& hidden: hiddenNeuron)
+        {
+            if (hidden->type == HIDDEN)
+                cout << "activation: "<< hidden->activation << " bias:" << hidden->bias << " state:" << hidden->state << " active:"  << hidden->active << " layer: " << hidden->layer << " index:" << hidden->index << endl;
         }
         cout << "Connections:" << endl;
         for (const auto& link : links) {
@@ -268,7 +289,7 @@ public:
         }
     }
 
-    void displayNetworkInfoForAnalysis(const string& filename) {
+    void StreamAnalysis(const string& filename) {
         ofstream outFile(filename, ios::app);
         if (!outFile) {
             throw runtime_error("Error opening file for writing.");
@@ -278,16 +299,16 @@ public:
         ss << "Network\n";
         ss << "Neuron Type,Bias,Activation,State\n";
         for (const auto& neuron : neurons) {
-            ss << (neuron.type == Sensor ? "Input" : (neuron.type == Output ? "Output" : "Hidden")) << ","
+            ss << (neuron.type == SENSOR ? "Input" : (neuron.type == OUTPUT ? "OUTPUT" : "Hidden")) << ","
             << neuron.bias << "," << neuron.activation << "," << neuron.state << "\n";
         }
 
         ss << "\nConnections\n";
         ss << "From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight\n";
         for (const auto& link : links) {
-            ss << (link.from.type == Sensor ? "Input" : (link.from.type == Output ? "Output" : "Hidden")) << ","
+            ss << (link.from.type == SENSOR ? "Input" : (link.from.type == OUTPUT ? "OUTPUT" : "Hidden")) << ","
             << link.from.bias << ","
-            << (link.to.type == Sensor ? "Input" : (link.to.type == Output ? "Output" : "Hidden")) << ","
+            << (link.to.type == SENSOR ? "Input" : (link.to.type == OUTPUT ? "OUTPUT" : "Hidden")) << ","
             << link.to.bias << "," << link.weight << "\n";
         }
 
@@ -354,9 +375,11 @@ public:
     {
         string gen_id;
         GenIdGenerator(gen_id, HiddenNode, layers[layer], layer);
-        neurons.emplace_back(Hidden, bias, act, layers[layer], layer, gen_id);
+        neurons.emplace_back(HIDDEN, bias, act, layers[layer], layer, gen_id);
         RegistrateGen(gen_id, HiddenNode, bias, layer, layers[layer]);
         layers[layer]++;
+        hiddenNeuron.push_back(&neurons.back());
+        hiddenSize++;
     }
 
     void DeleteHiddenNode(int layer, int index)
@@ -376,13 +399,17 @@ public:
                     in->disable();
             }
         }
+        else
+        {
+            cout << "Hidden Node not found\n";
+        }
     }
 
     bool isValidConnection(Neuron **f, Neuron **t)
     {
-        if (((*f)->type == Input && (*t)->type == Input) || ((*f)->type == Output && (*t)->type == Output) || ((*f)->type == Hidden && (*t)->type == Hidden && (*f)->layer == (*t)->layer))
+        if (((*f)->type == SENSOR && (*t)->type == SENSOR) || ((*f)->type == OUTPUT && (*t)->type == OUTPUT) || ((*f)->type == HIDDEN && (*t)->type == HIDDEN && (*f)->layer == (*t)->layer))
             return false;
-        if ((((*f)->type == Hidden || (*f)->type == Output) && ((*t)->type == Input || (*t)->type == Output)) || ((*f)->type == Hidden && (*t)->type == Hidden && (*t)->layer < (*f)->layer))
+        if ((((*f)->type == HIDDEN || (*f)->type == OUTPUT) && ((*t)->type == SENSOR || (*t)->type == OUTPUT)) || ((*f)->type == HIDDEN && (*t)->type == HIDDEN && (*t)->layer < (*f)->layer))
         {
             Neuron *tmp;
             tmp = *f;
@@ -417,7 +444,7 @@ public:
         uniform_real_distribution<> dis(-0.1, 0.1);
         float weight = static_cast<float>(dis(en)) / RAND_MAX * sqrt(2.0 / inputSize) * inputSize;
         RegistrateGen(gen_id, Weight, weight, n1->layer, n1->index, n2->layer, n2->index, n1, n2);
-        links.emplace_back(n1, n2, weight, gen_id);
+        links.emplace_back(*n1, *n2, weight, gen_id);
         n2->in.push_back(&links.back());
         n1->out.push_back(&links.back());
     }
@@ -431,6 +458,10 @@ public:
             it->disable();
     }
 
+    void InitialSortedGens()
+    {
+        SortedGens.assign(gens.begin(),gens.end());
+    }
 private:
     void createInitialNodes() {
         mt19937 en(rand());
@@ -438,7 +469,7 @@ private:
         for (int i = 0; i < inputSize; i++) {
             string gen_id;
             GenIdGenerator(gen_id, Input, i);
-            neurons.emplace_back(Sensor, dis(en) * 0.2 - 0.1, sigmoid, i ,0, gen_id);
+            neurons.emplace_back(SENSOR, dis(en) * 0.2 - 0.1, sigmoid, i ,0, gen_id);
             inputNeuron.push_back(&neurons.back());
             layers_Neurons[0].push_back(&neurons.back());
             layers[0]++;
@@ -448,7 +479,7 @@ private:
         for (int i = 0; i < outputSize; i++) {
             string gen_id;
             GenIdGenerator(gen_id, Output,i);
-            neurons.emplace_back(Output, dis(en) * 0.2 - 0.1, sigmoid, i , 1, gen_id);
+            neurons.emplace_back(OUTPUT, dis(en) * 0.2 - 0.1, sigmoid, i , 1, gen_id);
             layers_Neurons[1].push_back(&neurons.back());
             outputNeuron.push_back(&neurons.back());
             layers[1]++;
@@ -464,8 +495,8 @@ private:
 
         for (int i = 0; i < inputSize; i++) {
             for (int j = 0; j < outputSize; j++) {
-                if (dis(en) > 0.0)
-                {
+                // if (dis(en) > 0.0)
+                // {
                     float weight = static_cast<float>(dis(en)) / RAND_MAX * sqrt(2.0 / inputSize) * inputSize;
                     string gen_id;
                     GenIdGenerator(gen_id, Weight, neurons[i].index, neurons[i].layer, neurons[inputSize + j].index, neurons[inputSize + j].layer);
@@ -473,7 +504,7 @@ private:
                     neurons[inputSize + j].in.push_back(&links.back());
                     neurons[i].out.push_back(&links.back());
                     RegistrateGen(gen_id, Weight, weight, neurons[i].layer, neurons[i].index, neurons[inputSize + j].layer, neurons[inputSize + j].index, &neurons[i], &neurons[inputSize + j]);
-                }
+                // }
             }
         }
     }
@@ -512,6 +543,7 @@ Network buildNetwork(int inputSize, int outputSize)
   }
 */
 tuple<unordered_map<string, _Gen>, unordered_map<string, _Gen> > gen_recognizer(const Network& dominantParent, const Network& weakParent)
+
 {
     unordered_map<string, _Gen> matchedGen, unmatched;
     for (const auto& [gene_id, gene] : dominantParent.gens) {
@@ -523,4 +555,355 @@ tuple<unordered_map<string, _Gen>, unordered_map<string, _Gen> > gen_recognizer(
         }
     }
     return {matchedGen, unmatched};
+}
+
+
+template <typename Gene>
+class GeneticAlgorithm {
+private:
+    using Individual = vector<Gene>;
+    using Population = vector<unique_ptr<Individual>>;
+    function<Individual()> generateIndividual;
+    function<double(const Individual&)> fitnessFunction;
+    function<Individual(const Individual&, const Individual&)> crossoverFunction;
+    function<void(Individual&)> mutationFunction;
+
+    int populationSize;
+    double mutationRate;
+    int eliteSize;
+    double Threshold;
+    class RandomGenerator {
+    private:
+        mt19937 rng;
+        uniform_real_distribution<> dist;
+    public:
+        RandomGenerator() : rng(time(0)), dist(0, 1) {}
+        double operator()() { return dist(rng); }
+    };
+
+    thread_local static RandomGenerator randomGenerator;
+
+public:
+    class Specie {
+        public:
+            vector<Gene&> members;
+            Network representative;
+            double totalAdjustedFitness;
+
+            Specie(Gene &initialMember)
+            {
+                initialMember.InitialSortedGens();
+                members.reserve(50);
+                members.push_back(initialMember);
+                representative = initialMember;
+                totalAdjustedFitness = 0;
+            }
+
+            void addMember(Gene &network) {
+                members.push_back(network);
+            }
+
+            void calculateAdjustedFitness() {
+                for (auto& member : members) {
+                    double sharedFitness = member.score / members.size();
+                    totalAdjustedFitness += sharedFitness;
+                    member.adjustedFitness = sharedFitness;
+                }
+            }
+
+            int countExcessGenes(const Gene& other) const {
+                if (representative.SortedGens.empty() || other.SortedGens.empty()) return 0;
+
+                const string& maxInnovThis = representative.SortedGens.back().gen_id;
+                const string& maxInnovOther = other.SortedGens.back().gen_id;
+
+                int excessCount = 0;
+                for (const auto& [_, gene] : representative.SortedGens) {
+                    if (gene.gen_id > maxInnovOther) excessCount++;
+                }
+                for (const auto& [_, gene] : other.SortedGens) {
+                    if (gene.gen_id > maxInnovThis) excessCount++;
+                }
+
+                return excessCount;
+            }
+
+            int countDisjointGenes(const Gene& other) const {
+                unordered_map<string, bool> thisGenes;
+                for (const auto& [_, gene] : representative.SortedGens) {
+                    thisGenes[gene.gen_id] = true;
+                }
+
+                int disjointCount = 0;
+                for (const auto& [_, gene] : other.SortedGens) {
+                    if (thisGenes.find(gene.gen_id) == thisGenes.end() &&
+                        gene.gen_id < representative.SortedGens.back().gen_id) {
+                        disjointCount++;
+                    }
+                }
+
+                for (const auto& [gen_id, _] : representative.SortedGens) {
+                    string &ss = gen_id;
+                    auto lambda = [&ss](const auto& pair) { return pair.first == ss; };
+                    if (std::find_if(other.SortedGens.begin(), other.SortedGens.end(), lambda) == other.SortedGens.end() &&
+                        gen_id < other.SortedGens.back().first) {
+                        disjointCount++;
+                    }
+                }
+
+                return disjointCount;
+            }
+
+            double averageWeightDifference(const Gene& other) const {
+                unordered_map<string, double> thisWeights;
+                for (const auto& [_, gene] : representative.SortedGens) {
+                    thisWeights[gene.gen_id] = gene.value;
+                }
+
+                double totalDiff = 0.0;
+                int matchingGenes = 0;
+
+                for (const auto& [_, gene] : other.SortedGens) {
+                    auto it = thisWeights.find(gene.gen_id);
+                    if (it != thisWeights.end()) {
+                        totalDiff += abs(it->second - gene.value);
+                        matchingGenes++;
+                    }
+                }
+
+                return matchingGenes > 0 ? totalDiff / matchingGenes : 0.0;
+            }
+
+            double calculateCompatibility(Gene &other) const {
+                other.InitialSortedGens();
+                int E = countExcessGenes(other);
+                int D = countDisjointGenes(other);
+                double W = averageWeightDifference(other);
+                int N = max(representative.SortedGens.size(), other.SortedGens.size());
+                N = (N < 20) ? 1 : N; // Normalize for small genomes
+
+                const double c1 = 1.0, c2 = 1.0, c3 = 0.4; // Example coefficients
+                return (c1 * E / N) + (c2 * D / N) + (c3 * W);
+            }
+            bool isCompatible(Gene &net, double threshold)
+            {
+                double c = calculateCompatibility(net);
+                if (threshold > c)
+                    return true;
+                return false;
+            }
+    };
+    using Species = vector<Specie>;
+    GeneticAlgorithm(
+        function<Individual()> genIndividual,
+        function<double(const Individual&)> fitFunc,
+        function<Individual(const Individual&, const Individual&)> crossFunc,
+        function<void(Individual&)> mutFunc,
+        int popSize = 100,
+        double mutRate = 0.01,
+        int eliteCount = 2,
+        int threshold = 1
+    ) : generateIndividual(move(genIndividual)),
+        fitnessFunction(move(fitFunc)),
+        crossoverFunction(move(crossFunc)),
+        mutationFunction(move(mutFunc)),
+        populationSize(popSize),
+        mutationRate(mutRate),
+        eliteSize(eliteCount),
+        Threshold(threshold)
+    {}
+
+    Individual evolve(int generations) {
+        Population population = initializePopulation();
+        vector<double> fitnesses(populationSize);
+        for (int gen = 0; gen < generations; ++gen) {
+            updateFitnesses(population, fitnesses);
+            Species Species = spliteToSpecies(population);
+            Population newPopulation = selectElites(population, fitnesses);
+
+            while (newPopulation.size() < populationSize) {
+                auto& parent1 = *selectParent(population, fitnesses);
+                auto& parent2 = *selectParent(population, fitnesses);
+                auto child = make_unique<Individual>(crossoverFunction(*parent1, *parent2));
+                if (randomGenerator() < mutationRate) {
+                    mutationFunction(*child);
+                }
+                newPopulation.push_back(move(child));
+            }
+
+            population = move(newPopulation);
+        }
+
+        return getBestIndividual(population, fitnesses);
+    }
+
+private:
+
+    void speciate(Species &species, Gene &network) {
+        bool foundSpecies = false;
+        for (auto& sp : species) {
+            if (sp.isCompatible(network, Threshold)) {
+                sp.addMember(network);
+                foundSpecies = true;
+                break;
+            }
+        }
+        if (!foundSpecies) {
+            species.emplace_back(network);
+        }
+    }
+
+    Species spliteToSpecies(Population &population)
+    {
+        static Species sps;
+        sps.clear();
+        for (auto& member: population)
+        {
+            speciate(sps, member);
+        }
+        return sps;
+    }
+
+    Population initializePopulation() {
+        Population population;
+        population.reserve(populationSize);// dropping the population vector time consimung in alocating and realocating
+        for (int i = 0; i < populationSize; ++i) {
+            population.emplace_back(make_unique<Individual>(generateIndividual()));
+        }
+        return population;
+    }
+
+    void updateFitnesses(const Population& population, vector<double>& fitnesses) {
+        for (size_t i = 0; i < population.size(); ++i) {
+            fitnesses[i] = fitnessFunction(*population[i]);
+        }
+    }
+
+    Population selectElites(const Population& population, const vector<double>& fitnesses) {
+        static Population elites;
+        if (elites.size() > 0)
+            elites.clear();
+        if (elites.capacity() == 0)
+            elites.reserve(populationSize);
+        vector<size_t> indices(population.size());
+        iota(indices.begin(), indices.end(), 0);
+        partial_sort(indices.begin(), indices.begin() + eliteSize, indices.end(),
+            [&fitnesses](size_t a, size_t b) { return fitnesses[a] > fitnesses[b]; });
+
+        for (int i = 0; i < eliteSize; ++i) {
+            elites.push_back(make_unique<Individual>(*population[indices[i]]));
+        }
+        return elites;
+    }
+
+    const Individual* selectParent(const Population& population, const vector<double>& fitnesses) {
+        double totalFitness = accumulate(fitnesses.begin(), fitnesses.end(), 0.0);
+        double pick = randomGenerator() * totalFitness;
+        double current = 0;
+        for (size_t i = 0; i < population.size(); ++i) {
+            current += fitnesses[i];
+            if (current > pick) {
+                return population[i].get();
+            }
+        }
+        return population.back().get();
+    }
+
+    Individual getBestIndividual(const Population& population, const vector<double>& fitnesses) {
+        auto it = max_element(fitnesses.begin(), fitnesses.end());
+        return *population[distance(fitnesses.begin(), it)];
+    }
+};
+
+template <typename Gene>
+thread_local typename GeneticAlgorithm<Gene>::RandomGenerator GeneticAlgorithm<Gene>::randomGenerator;
+
+/**
+ * ToDo: specie management
+*/
+
+void aggressiveTest() {
+    // Test 1: Create a network with 3 inputs and 2 outputs
+    Network net(3, 2);
+    assert(net.inputSize == 3);
+    assert(net.outputSize == 2);
+    assert(net.neurons.size() == 5); // 3 inputs + 2 outputs
+    assert(net.links.size() == 6); // Each input connected to each output
+
+    // Test 2: Activate the network with valid input
+    deque<double> input = {0.5, 0.3, 0.9};
+    auto output = net.activate(input);
+    assert(output.size() == 2); // Should return 2 outputs
+    cout << "Output after activation: ";
+    for (const auto& val : output) {
+        cout << val << " ";
+    }
+    cout << endl;
+
+    // Test 3: Attempt to activate with mismatched input size
+    try {
+        deque<double> invalidInput = {0.5, 0.3}; // Only 2 inputs
+        net.activate(invalidInput);
+        assert(false); // Should not reach here
+    } catch (const runtime_error& e) {
+        cout << "Caught expected error: " << e.what() << endl;
+    }
+
+    // Test 4: Add a hidden node and check the count
+    net.addHiddenNode(2, 0.1, sigmoid);
+    assert(net.hiddenSize == 1);
+    assert(net.neurons.size() == 6); // 6 total neurons now
+
+    // Test 5: Add a link and check the connections
+    size_t initialLinkCount = net.links.size();
+    net.addLink();
+    assert(net.links.size() == initialLinkCount + 1);
+
+    // Test 6: Delete a hidden node
+    net.DeleteHiddenNode(2, 0);
+    net.display();
+    assert(net.hiddenNeuron.back()->active == false);
+    assert(net.neurons.size() == 6); // Neuron still exists, just disabled
+
+    // Test 7: Check display functionality
+    net.display(); // This should print the network information
+
+    // Test 8: Stream analysis to a file
+    string filename = "network_analysis.txt";
+    net.StreamAnalysis(filename);
+    ifstream inFile(filename);
+    assert(inFile.is_open());
+    cout << "Network analysis written to " << filename << endl;
+
+    // Test 9: Add and register genes
+    _Gen gene1("I_0_0", Input, 0.5, 0, 0);
+    int old  = net.gens.size();
+    net.addGen(gene1);
+
+    assert(net.gens.size() == 1 + old); // Should have 1 more gene
+
+    // Test 10: Check for valid connections
+    Neuron* n1 = &net.neurons[0]; // First input neuron
+    Neuron* n2 = &net.neurons[3]; // First output neuron
+    assert(net.isValidConnection(&n1, &n2) == true); // Should be valid
+
+    // Test 11: Attempt invalid connection (input to input)
+    Neuron* n3 = &net.neurons[1]; // Second input neuron
+    assert(net.isValidConnection(&n1, &n3) == false); // Should be invalid
+
+    // Test 12: Check the registration of genes
+    string gen_id = "G2";
+    net.RegistrateGen(gen_id, Weight, 0.3, 0, 0);
+    assert(net.gens.count(gen_id) == 1); // Should be registered
+
+    // Test 13: Check the initial sorted genes
+    net.InitialSortedGens();
+    assert(net.SortedGens.size() == net.gens.size()); // Should match the number of genes
+
+    cout << "All tests passed!" << endl;
+}
+
+int main() {
+    aggressiveTest();
+    return 0;
 }

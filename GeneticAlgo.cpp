@@ -126,3 +126,8 @@ private:
 
 template <typename Gene>
 thread_local typename GeneticAlgorithm<Gene>::RandomGenerator GeneticAlgorithm<Gene>::randomGenerator;
+
+/**
+ * ToDo: specie management
+*/
+
