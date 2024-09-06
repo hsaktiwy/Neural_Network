@@ -11,6 +11,7 @@
 #include <memory>
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <array>
 #define endl '\n'
 using namespace std;
@@ -18,6 +19,32 @@ using namespace std;
 
 double sigmoid(double x) {
     return 1.0 / (1.0 + exp(-x));
+}
+
+string specie_Name(double e, double d, double c)
+{
+    char s[49];
+    union {
+        double d;
+        uint64_t u;
+    } converter;
+    converter.d = e;
+    sprintf(s, "%016llx", converter.u);
+    converter.d = d;
+    sprintf(&s[16], "%016llx", converter.u);
+    converter.d = c;
+    sprintf(&s[32], "%016llx", converter.u);
+    s[48] = '\0';
+    return s;
+}
+
+long simpleHash(int a, int b, int sequenceSize = 256)
+{
+    if (a == b)
+        return -1;
+    long mid = (a + b);
+    long result = ((mid)*(mid + (abs(a - b) + a * b))) / 2 + ((a > b) ? a + sequenceSize: b);
+    return result;
 }
 
 enum NType {
@@ -37,12 +64,29 @@ enum GenType {
 class Neuron;
 class NLink {
 public:
-    Neuron& from;// Source neuron index
-    Neuron& to;// Recipient neuron index
+    Neuron* from;// Source neuron index
+    Neuron* to;// Recipient neuron index
     double weight;// Weight of the link
     string innovation; // Innovation number
     bool active;
-    NLink(Neuron& f, Neuron& t, double w, string &ino) : from(f), to(t), weight(w), innovation(ino), active(true) {}
+    NLink(Neuron* f, Neuron* t, double w, string &ino) : from(f), to(t), weight(w), innovation(ino), active(true) {}
+    NLink(const NLink& copy)
+    {
+        *this = copy;
+    }
+
+    NLink& operator=(const NLink& copy)
+    {
+        if (this != &copy)
+        {
+            from = copy.from;
+            to = copy.to;
+            weight = copy.weight;
+            innovation = copy.innovation;
+            active = copy.active;
+        }
+        return *this;
+    }
     void  disable()
     {
         active = false;
@@ -148,7 +192,7 @@ public:
             state = 0;
         for (const auto& link : in) {
             if (link->active)
-                state += link->from.activation * link->weight;
+                state += link->from->activation * link->weight;
         }
         // cerr << "Calculated State : " << state << endl;
         activation = activation_function(state); // Apply activation function
@@ -158,6 +202,7 @@ public:
 
 class Network {
 public:
+    static int indexCounter;
     static constexpr size_t MAX_LAYER = 1000;
     array<int, MAX_LAYER> layers{};
     array<deque<Neuron*>, MAX_LAYER> layers_Neurons{};
@@ -170,13 +215,59 @@ public:
     deque<Neuron*> inputNeuron; // Store indices instead of references
     deque<Neuron*> outputNeuron;
     deque<Neuron*> hiddenNeuron;
-
-    int score = 0;
+    double adjustedFitness;
+    double score = 0;
     vector<pair<string, _Gen>> SortedGens;
+    int index;
 
     Network(int inSize, int outSize) : inputSize(inSize), outputSize(outSize), hiddenSize(0) {
         createInitialNodes();
         connectInitialNodes();
+        index = indexCounter;
+        indexCounter++;
+    }
+
+    Network(const Network& copy)
+    {
+        *this = copy;
+    }
+
+    Network& operator=(const Network& copy)
+    {
+        if (this != &copy)
+        {
+            inputSize = copy.inputSize;
+            outputSize = copy.outputSize;
+            hiddenSize = copy.hiddenSize;
+            links = copy.links;
+
+            neurons = copy.neurons;
+            for(auto& neu: neurons)
+            {
+                if (neu.type == SENSOR)
+                {
+                    inputNeuron.push_back(&neu);
+                }
+                if (neu.type == OUTPUT)
+                {
+                    outputNeuron.push_back(&neu);
+                }
+                if (neu.type == HIDDEN)
+                {
+                    hiddenNeuron.push_back(&neu);
+                }
+            }
+            adjustedFitness = copy.adjustedFitness;
+            score = copy.score;
+            SortedGens = copy.SortedGens;
+            index = copy.index;
+        }
+        return *this;
+    }
+
+    static void indexCounterReset( void )
+    {
+        indexCounter = 0;
     }
 
     Network(vector<_Gen> &Gens)
@@ -214,7 +305,7 @@ public:
                     auto it_to = find_if(neurons.begin(), neurons.end(), [to](Neuron &a){ return (to->index == a.index && to->layer == a.layer);});
                     if (it_from != neurons.end() && it_to != neurons.end())
                     {
-                        links.emplace_back(*it_from, *it_to, gen.value, gen.gen_id);
+                        links.emplace_back(&(*it_from), &(*it_to), gen.value, gen.gen_id);
                         it_to->in.push_back(&links.back());
                         it_from->out.push_back(&links.back());
                         gens[gen.gen_id] = gen;
@@ -283,8 +374,8 @@ public:
         }
         cout << "Connections:" << endl;
         for (const auto& link : links) {
-            cout << "From Neuron (Type " << link.from.type << ", Bias " << link.from.bias << ") ";
-            cout << "to Neuron (Type " << link.to.type << ", Bias " << link.to.bias << ") ";
+            cout << "From Neuron (Type " << link.from->type << ", Bias " << link.from->bias << ") ";
+            cout << "to Neuron (Type " << link.to->type << ", Bias " << link.to->bias << ") ";
             cout << "with Weight: " << link.weight << endl;
         }
     }
@@ -306,10 +397,10 @@ public:
         ss << "\nConnections\n";
         ss << "From Neuron Type,From Neuron Bias,To Neuron Type,To Neuron Bias,Weight\n";
         for (const auto& link : links) {
-            ss << (link.from.type == SENSOR ? "Input" : (link.from.type == OUTPUT ? "OUTPUT" : "Hidden")) << ","
-            << link.from.bias << ","
-            << (link.to.type == SENSOR ? "Input" : (link.to.type == OUTPUT ? "OUTPUT" : "Hidden")) << ","
-            << link.to.bias << "," << link.weight << "\n";
+            ss << (link.from->type == SENSOR ? "Input" : (link.from->type == OUTPUT ? "OUTPUT" : "Hidden")) << ","
+            << link.from->bias << ","
+            << (link.to->type == SENSOR ? "Input" : (link.to->type == OUTPUT ? "OUTPUT" : "Hidden")) << ","
+            << link.to->bias << "," << link.weight << "\n";
         }
 
         outFile << ss.str();
@@ -409,7 +500,10 @@ public:
     {
         if (((*f)->type == SENSOR && (*t)->type == SENSOR) || ((*f)->type == OUTPUT && (*t)->type == OUTPUT) || ((*f)->type == HIDDEN && (*t)->type == HIDDEN && (*f)->layer == (*t)->layer))
             return false;
-        if ((((*f)->type == HIDDEN || (*f)->type == OUTPUT) && ((*t)->type == SENSOR || (*t)->type == OUTPUT)) || ((*f)->type == HIDDEN && (*t)->type == HIDDEN && (*t)->layer < (*f)->layer))
+        if (((*f)->type == HIDDEN && (*t)->type == SENSOR)
+            || ((*f)->type == OUTPUT && (*t)->type == HIDDEN)
+            || ((*f)->type == OUTPUT && (*t)->type == SENSOR)
+            || ((*f)->type == HIDDEN && (*t)->type == HIDDEN && (*t)->layer < (*f)->layer))
         {
             Neuron *tmp;
             tmp = *f;
@@ -444,7 +538,7 @@ public:
         uniform_real_distribution<> dis(-0.1, 0.1);
         float weight = static_cast<float>(dis(en)) / RAND_MAX * sqrt(2.0 / inputSize) * inputSize;
         RegistrateGen(gen_id, Weight, weight, n1->layer, n1->index, n2->layer, n2->index, n1, n2);
-        links.emplace_back(*n1, *n2, weight, gen_id);
+        links.emplace_back(n1, n2, weight, gen_id);
         n2->in.push_back(&links.back());
         n1->out.push_back(&links.back());
     }
@@ -500,7 +594,7 @@ private:
                     float weight = static_cast<float>(dis(en)) / RAND_MAX * sqrt(2.0 / inputSize) * inputSize;
                     string gen_id;
                     GenIdGenerator(gen_id, Weight, neurons[i].index, neurons[i].layer, neurons[inputSize + j].index, neurons[inputSize + j].layer);
-                    links.emplace_back(neurons[i], neurons[inputSize + j], weight, gen_id);
+                    links.emplace_back(&neurons[i], &neurons[inputSize + j], weight, gen_id);
                     neurons[inputSize + j].in.push_back(&links.back());
                     neurons[i].out.push_back(&links.back());
                     RegistrateGen(gen_id, Weight, weight, neurons[i].layer, neurons[i].index, neurons[inputSize + j].layer, neurons[inputSize + j].index, &neurons[i], &neurons[inputSize + j]);
@@ -511,6 +605,7 @@ private:
 
 };
 
+int Network::indexCounter = 0;
 Network buildNetwork(int inputSize, int outputSize)
 {
     if (inputSize== 0 || outputSize == 0)
@@ -557,14 +652,75 @@ tuple<unordered_map<string, _Gen>, unordered_map<string, _Gen> > gen_recognizer(
     return {matchedGen, unmatched};
 }
 
+class SpeciesPerformanceManager {
+    public:
+        struct SpeciesData {
+            vector<double> fitnessHistory;
+            int currentSize;
+            int bestFitness;
+            int generationLastImproved;
+
+            int currentEliteSize;
+            bool isStagnant;
+        };
+
+        unordered_map<string, SpeciesData> speciesMap;
+        int currentGeneration = 0;
+        int maxGenerationsWithoutImprovement = 10;
+
+        int getBestFitness(const string& speciesId) {
+            return speciesMap[speciesId].bestFitness;
+        }
+
+        void updateSpecies(const string& speciesId, int size, int bestFitness) {
+            auto& data = speciesMap[speciesId];
+            data.fitnessHistory.push_back(bestFitness);
+            data.currentSize = size;
+            data.bestFitness = max(data.bestFitness, bestFitness);
+            if (bestFitness > data.bestFitness) {
+                data.generationLastImproved = currentGeneration;
+            }
+        }
+
+        void evaluateSpecies() {
+            for (auto& [speciesId, data] : speciesMap) {
+                if (currentGeneration - data.generationLastImproved > maxGenerationsWithoutImprovement) {
+                    data.isStagnant = true;
+                } else {
+                    data.isStagnant = false;
+                }
+            }
+        }
+
+        void adjustParameters() {
+            for (auto& [speciesId, data] : speciesMap) {
+                // Adjust elite size and mating rate based on performance
+                if (data.currentSize > 10) {
+                    cout << "Increasing elite size for species " << speciesId << endl;
+                } else {
+                    cout << "Decreasing elite size for species " << speciesId << endl;
+                }
+            }
+        }
+
+        void nextGeneration() {
+            currentGeneration++;
+        }
+
+        void CalculateEliteSize(const string& speciesId) {
+            auto& data = speciesMap[speciesId];
+            data.currentEliteSize = (data.currentSize / 5);
+        }
+};
+
 
 template <typename Gene>
 class GeneticAlgorithm {
 private:
-    using Individual = vector<Gene>;
-    using Population = vector<unique_ptr<Individual>>;
+    using Individual = Gene;
+    using Population = vector<Individual>;
     function<Individual()> generateIndividual;
-    function<double(const Individual&)> fitnessFunction;
+    function<double(Individual&)> fitnessFunction;
     function<Individual(const Individual&, const Individual&)> crossoverFunction;
     function<void(Individual&)> mutationFunction;
 
@@ -586,36 +742,40 @@ private:
 public:
     class Specie {
         public:
-            vector<Gene&> members;
+            vector<Gene*> members;
+            vector<Gene*> elites;
+
             Network representative;
             double totalAdjustedFitness;
-
-            Specie(Gene &initialMember)
+            int total_E,total_D;
+            double total_W;
+            double av_E, av_D, av_W;
+            string speciesName;
+            Specie() = default;
+            Specie(Gene &initialMember):total_E(0),total_D(0),total_W(0), representative(initialMember)
             {
-                initialMember.InitialSortedGens();
                 members.reserve(50);
-                members.push_back(initialMember);
-                representative = initialMember;
+                members.push_back(&initialMember);
                 totalAdjustedFitness = 0;
             }
 
             void addMember(Gene &network) {
-                members.push_back(network);
+                members.push_back(&network);
             }
 
             void calculateAdjustedFitness() {
                 for (auto& member : members) {
-                    double sharedFitness = member.score / members.size();
+                    double sharedFitness = member->score / members.size();
                     totalAdjustedFitness += sharedFitness;
-                    member.adjustedFitness = sharedFitness;
+                    member->adjustedFitness = sharedFitness;
                 }
             }
 
             int countExcessGenes(const Gene& other) const {
                 if (representative.SortedGens.empty() || other.SortedGens.empty()) return 0;
 
-                const string& maxInnovThis = representative.SortedGens.back().gen_id;
-                const string& maxInnovOther = other.SortedGens.back().gen_id;
+                const string& maxInnovThis = representative.SortedGens.back().first;
+                const string& maxInnovOther = other.SortedGens.back().first;
 
                 int excessCount = 0;
                 for (const auto& [_, gene] : representative.SortedGens) {
@@ -630,27 +790,34 @@ public:
 
             int countDisjointGenes(const Gene& other) const {
                 unordered_map<string, bool> thisGenes;
+                cout << "Representative Sorted genes :" << representative.SortedGens.size() << endl;
+
                 for (const auto& [_, gene] : representative.SortedGens) {
                     thisGenes[gene.gen_id] = true;
                 }
+                cout << "After Representative Sorted genes :" << representative.SortedGens.size() << endl;
 
+                cout << "1\n";
+                cout << "Sorted genes :" << other.SortedGens.size() << endl;
                 int disjointCount = 0;
                 for (const auto& [_, gene] : other.SortedGens) {
                     if (thisGenes.find(gene.gen_id) == thisGenes.end() &&
-                        gene.gen_id < representative.SortedGens.back().gen_id) {
+                        gene.gen_id < representative.SortedGens.back().first) {
                         disjointCount++;
                     }
+                    cout << "> " << gene.gen_id << endl;
                 }
+                cout << "2\n";
 
                 for (const auto& [gen_id, _] : representative.SortedGens) {
-                    string &ss = gen_id;
+                    const string &ss = gen_id;
                     auto lambda = [&ss](const auto& pair) { return pair.first == ss; };
-                    if (std::find_if(other.SortedGens.begin(), other.SortedGens.end(), lambda) == other.SortedGens.end() &&
+                    if (find_if(other.SortedGens.begin(), other.SortedGens.end(), lambda) == other.SortedGens.end() &&
                         gen_id < other.SortedGens.back().first) {
                         disjointCount++;
                     }
                 }
-
+                cout << "? end\n";
                 return disjointCount;
             }
 
@@ -674,14 +841,14 @@ public:
                 return matchingGenes > 0 ? totalDiff / matchingGenes : 0.0;
             }
 
-            double calculateCompatibility(Gene &other) const {
+            double calculateCompatibility(Gene &other) {
                 other.InitialSortedGens();
                 int E = countExcessGenes(other);
                 int D = countDisjointGenes(other);
                 double W = averageWeightDifference(other);
                 int N = max(representative.SortedGens.size(), other.SortedGens.size());
                 N = (N < 20) ? 1 : N; // Normalize for small genomes
-
+                total_E+=E,total_D+=D,total_W+=W;
                 const double c1 = 1.0, c2 = 1.0, c3 = 0.4; // Example coefficients
                 return (c1 * E / N) + (c2 * D / N) + (c3 * W);
             }
@@ -692,73 +859,170 @@ public:
                     return true;
                 return false;
             }
+
+            void setAvrage()
+            {
+                av_E = static_cast<double>(total_E/ members.size()),
+                av_D = static_cast<double>(total_D/members.size()),
+                av_W = static_cast<double>(total_W/members.size());
+                speciesName = specie_Name(av_E, av_D, av_W);
+            }
     };
     using Species = vector<Specie>;
     GeneticAlgorithm(
         function<Individual()> genIndividual,
-        function<double(const Individual&)> fitFunc,
+        function<double(Individual&)> fitFunc,
         function<Individual(const Individual&, const Individual&)> crossFunc,
         function<void(Individual&)> mutFunc,
         int popSize = 100,
         double mutRate = 0.01,
         int eliteCount = 2,
         int threshold = 1
-    ) : generateIndividual(move(genIndividual)),
-        fitnessFunction(move(fitFunc)),
-        crossoverFunction(move(crossFunc)),
-        mutationFunction(move(mutFunc)),
+    ) : generateIndividual(genIndividual),
+        fitnessFunction(fitFunc),
+        crossoverFunction(crossFunc),
+        mutationFunction(mutFunc),
         populationSize(popSize),
         mutationRate(mutRate),
         eliteSize(eliteCount),
         Threshold(threshold)
     {}
 
+    // Individual evolve(int generations) {
+    //     Population population = initializePopulation();
+    //     vector<double> fitnesses(populationSize);
+    //     for (int gen = 0; gen < generations; ++gen) {
+    //         updateFitnesses(population, fitnesses);
+    //         Species Species = spliteToSpecies(population);
+    //         Population newPopulation = selectElites(population, fitnesses);
+
+    //         while (newPopulation.size() < populationSize) {
+    //             auto& parent1 = *selectParent(population, fitnesses);
+    //             auto& parent2 = *selectParent(population, fitnesses);
+    //             auto child = make_unique<Individual>(crossoverFunction(*parent1, *parent2));
+    //             if (randomGenerator() < mutationRate) {
+    //                 mutationFunction(*child);
+    //             }
+    //             newPopulation.push_back(move(child));
+    //         }
+
+    //         population = move(newPopulation);
+    //     }
+
+    //     return getBestIndividual(population, fitnesses);
+    // }
+
     Individual evolve(int generations) {
         Population population = initializePopulation();
         vector<double> fitnesses(populationSize);
+        SpeciesPerformanceManager manager;
+        Network::indexCounterReset();
+        unordered_set<long> mates;
         for (int gen = 0; gen < generations; ++gen) {
             updateFitnesses(population, fitnesses);
-            Species Species = spliteToSpecies(population);
-            Population newPopulation = selectElites(population, fitnesses);
+            Species species = splitToSpecies(population);
 
-            while (newPopulation.size() < populationSize) {
-                auto& parent1 = *selectParent(population, fitnesses);
-                auto& parent2 = *selectParent(population, fitnesses);
-                auto child = make_unique<Individual>(crossoverFunction(*parent1, *parent2));
-                if (randomGenerator() < mutationRate) {
-                    mutationFunction(*child);
-                }
-                newPopulation.push_back(move(child));
+            // Adjust fitnesses based on species
+            for (auto& sp : species) {
+                sp.calculateAdjustedFitness();
+                sp.setAvrage();
+                manager.updateSpecies(sp.speciesName, sp.members.size(), sp.totalAdjustedFitness);
+                manager.CalculateEliteSize(sp.speciesName);
+                int eliteSize = manager.speciesMap[sp.speciesName].currentEliteSize;
+                sp.elites= selectElites(sp.members, fitnesses, eliteSize);
             }
 
+            Population newPopulation;
+            while (newPopulation.size() < populationSize) {
+                Individual* parent1, *parent2;
+                if (randomGenerator() > 0.05)
+                {
+                    Specie &sp = species[rand() % species.size()];
+                    parent1 = selectParent(sp.members, fitnesses);
+                    parent2 = selectParent(sp.members, fitnesses);
+                }
+                else
+                {
+                    auto& sp1 = species[rand() % species.size()];
+                    auto& sp2 = species[rand() % species.size()];
+                    parent1 = selectParent(sp1.members, fitnesses);
+                    parent2 = selectParent(sp2.members, fitnesses);
+                }
+                long hashed = parent1->index + parent2->index;
+                if (mates.count(hashed) == 0) {
+                    mates.insert(hashed);    
+                    auto child = crossoverFunction(*parent1, *parent2);
+                    if (randomGenerator() < mutationRate) {
+                        mutationFunction(child);
+                    }
+                    mutateWithSimulatedAnnealing(child, 100, 0.95, gen);
+                    newPopulation.push_back(child);
+                }
+            }
             population = move(newPopulation);
-        }
-
-        return getBestIndividual(population, fitnesses);
     }
+    return getBestIndividual(population, fitnesses);
+}
 
 private:
 
+    void mutateWithSimulatedAnnealing(Network& network, double initialTemp, double coolingRate, int currentGeneration) {
+        double temperature = initialTemp * pow(coolingRate, currentGeneration); // Exponential cooling
+
+        mt19937 rng(random_device{}());
+        normal_distribution<> perturbation(0, 1); // Small perturbation
+
+        for (auto& link : network.links) {
+            if (uniform_real_distribution<>(0, 1)(rng) < 0.1) { // 10% chance to mutate each weight
+                double oldWeight = link.weight;
+                double newWeight = oldWeight + perturbation(rng) * temperature; // Perturb weight based on temperature
+
+                // Temporarily apply new weight
+                link.weight = newWeight;
+
+                // Evaluate change in fitness, here we assume a function that evaluates the entire network
+                double oldFitness = network.score; // Assuming current score is stored
+                double newFitness = fitnessFunction(network);
+
+                double deltaE = newFitness - oldFitness;
+
+                if (deltaE < 0 || exp(-deltaE / temperature) > uniform_real_distribution<>(0, 1)(rng)) {
+                    // Accept new weight
+                    network.score = newFitness; // Update network fitness
+                } else {
+                    // Revert to old weight
+                    link.weight = oldWeight;
+                }
+            }
+        }
+    }
+
     void speciate(Species &species, Gene &network) {
         bool foundSpecies = false;
+        cout << " int -- "<<  species.size() << endl;
+        int i = 0;
         for (auto& sp : species) {
+            cout << "inderxer : " << i << endl;
             if (sp.isCompatible(network, Threshold)) {
                 sp.addMember(network);
                 foundSpecies = true;
                 break;
             }
+            i++;
         }
         if (!foundSpecies) {
             species.emplace_back(network);
         }
+        cout << " -- OUT "<< endl;
     }
 
-    Species spliteToSpecies(Population &population)
+    Species splitToSpecies(Population &population)
     {
         static Species sps;
         sps.clear();
         for (auto& member: population)
         {
+            member.InitialSortedGens();
             speciate(sps, member);
         }
         return sps;
@@ -768,56 +1032,143 @@ private:
         Population population;
         population.reserve(populationSize);// dropping the population vector time consimung in alocating and realocating
         for (int i = 0; i < populationSize; ++i) {
-            population.emplace_back(make_unique<Individual>(generateIndividual()));
+            population.emplace_back(generateIndividual());
         }
         return population;
     }
 
-    void updateFitnesses(const Population& population, vector<double>& fitnesses) {
+    void updateFitnesses(Population& population, vector<double>& fitnesses) {
         for (size_t i = 0; i < population.size(); ++i) {
-            fitnesses[i] = fitnessFunction(*population[i]);
+            fitnesses[i] = fitnessFunction(population[i]);
         }
     }
 
-    Population selectElites(const Population& population, const vector<double>& fitnesses) {
-        static Population elites;
+     vector<Individual*> selectElites(const vector<Individual*>& population, const vector<double>& fitnesses, int Size) {
+        static vector<Individual*> elites;
         if (elites.size() > 0)
             elites.clear();
         if (elites.capacity() == 0)
             elites.reserve(populationSize);
         vector<size_t> indices(population.size());
         iota(indices.begin(), indices.end(), 0);
-        partial_sort(indices.begin(), indices.begin() + eliteSize, indices.end(),
+        partial_sort(indices.begin(), indices.begin() + Size, indices.end(),
             [&fitnesses](size_t a, size_t b) { return fitnesses[a] > fitnesses[b]; });
 
-        for (int i = 0; i < eliteSize; ++i) {
-            elites.push_back(make_unique<Individual>(*population[indices[i]]));
+        for (int i = 0; i < Size; ++i) {
+            elites.push_back(population[indices[i]]);
         }
         return elites;
     }
 
-    const Individual* selectParent(const Population& population, const vector<double>& fitnesses) {
+    Individual* selectParent(vector<Individual*>& population, const vector<double>& fitnesses) {
         double totalFitness = accumulate(fitnesses.begin(), fitnesses.end(), 0.0);
         double pick = randomGenerator() * totalFitness;
         double current = 0;
         for (size_t i = 0; i < population.size(); ++i) {
             current += fitnesses[i];
             if (current > pick) {
-                return population[i].get();
+                return population[i];
             }
         }
-        return population.back().get();
+        return population.back();
     }
 
     Individual getBestIndividual(const Population& population, const vector<double>& fitnesses) {
         auto it = max_element(fitnesses.begin(), fitnesses.end());
-        return *population[distance(fitnesses.begin(), it)];
+        return population[distance(fitnesses.begin(), it)];
     }
 };
 
 template <typename Gene>
 thread_local typename GeneticAlgorithm<Gene>::RandomGenerator GeneticAlgorithm<Gene>::randomGenerator;
 
+
+/************************************************************************************************************************************************************************/
+/************************************************************************************************************************************************************************/
+
+deque<double> input;
+// function<Individual()> genIndividual,
+Network CreatIndividual(void)
+{
+    Network net(2, 1);
+    net.activate(input);
+    return (net);
+}
+
+// function<Individual(const Individual&, const Individual&)> crossFunc,
+Network crossOver(const Network& p1, const Network& p2)
+{
+    const Network &DominantParent = (p1.score > p2.score) ? p1 : p2;
+    const Network &WeakParent = (p1.score <= p2.score) ? p1 : p2;
+    auto [matchedGen, unmatched] = gen_recognizer(DominantParent, WeakParent);
+    vector<_Gen> gens;
+    gens.reserve(matchedGen.size() + unmatched.size());
+    // Add all matched genes
+    for (const auto& [_, gene] : matchedGen) {
+        gens.push_back(gene);
+    }
+    vector<_Gen> all_unmatched;
+    all_unmatched.reserve(unmatched.size());
+    for (const auto& [_, gene] : unmatched) all_unmatched.push_back(gene);\
+    mt19937 en(rand());
+    uniform_real_distribution<> dis(0, 1);
+    for (const auto& gene : all_unmatched) {
+        gens.push_back(gene);
+    }
+    return (Network (gens));
+}
+// function<void(Individual&)> mutFunc,
+
+void mutFunc(Network& member)
+{
+    mt19937 en(rand());
+    uniform_real_distribution<> dis(0, 1);
+    bool mutate = false;
+    mutate = dis(en) < 0.05;
+    // add node (we can call this like a expensive evolution operation,
+      //so could we drop it rate more like what happen in nature ?)
+        // define the possiton  where we will add the node in case we wont to build new layer or not ?
+    if (mutate)
+    {
+        int newLayerIndex =  1 + std::uniform_int_distribution<>(0, member.layers.size() - 2)(en);
+        member.addHiddenNode(newLayerIndex, dis(en), sigmoid);
+        // add the gens
+    }
+    mutate = dis(en) < 0.01;
+    // extract node
+        // define the node that we wont to delete plus we need to delete all connection related to it
+    if (mutate)
+    {
+        int layer = std::uniform_int_distribution<>(1, member.hiddenNeuron.size())(en);
+        Neuron *node = member.hiddenNeuron[layer];
+        member.DeleteHiddenNode(node->layer, node->index);
+    }
+    // add link
+    mutate = dis(en) < 0.02;
+        // add link between 2 existing nodes
+    if (mutate)
+    {
+        member.addLink();
+    }
+    mutate = dis(en) < 0.01;
+    // extract link
+        // extract link between 2 existing nodes
+    if (mutate)
+    {
+        member.DeleteLink();
+    }
+}
+
+// function<double(const Individual&)> fitFunc,
+double fitFunc(Network& network)
+{
+    cout << "Activation : input size " << input.size() << endl;
+    network.activate(input);
+    int result =  (input[0] == input[1]) ? 0 : 1;
+    return (result - network.outputNeuron[0]->activation > 0.1);
+}
+/************************************************************************************************************************************************************************/
+/************************************************************************************************************************************************************************/
 /**
  * ToDo: specie management
 */
@@ -832,6 +1183,7 @@ void aggressiveTest() {
 
     // Test 2: Activate the network with valid input
     deque<double> input = {0.5, 0.3, 0.9};
+    net.display();
     auto output = net.activate(input);
     assert(output.size() == 2); // Should return 2 outputs
     cout << "Output after activation: ";
@@ -904,6 +1256,9 @@ void aggressiveTest() {
 }
 
 int main() {
-    aggressiveTest();
+    // aggressiveTest();
+    input = {0.5, 0.5};
+    GeneticAlgorithm<Network> ga(CreatIndividual, fitFunc, crossOver, mutFunc, 100, 0.01, 2, 1);
+    Network bestNetwork = ga.evolve(100);
     return 0;
 }
